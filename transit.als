@@ -102,7 +102,7 @@ pred doorsInOneLocationOnly{
 pred doorsAtLocationsOnTheirVehicle{
     all d: Door |
         all l: Location |
-            d = d.on.doorAt[l] <=> l in d.on.locations
+            d = d.on.doorAt[l] => l in d.on.locations
 }
 
 check validity{
