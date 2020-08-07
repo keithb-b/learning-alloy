@@ -1,4 +1,5 @@
-open util/relation as relation
+open util/relation
+open util/time as time
 
 //structure
 abstract sig Vehicle{
@@ -8,7 +9,7 @@ abstract sig Vehicle{
 }
 
 fun Vehicle::allDoorsOf: set Door{
-    relation/ran[this.doorAt] //was it really worth abbreviating "range"
+    ran[this.doorAt] //was it really worth abbreviating "range"?
 }     
 
 sig Transit extends Vehicle {
@@ -22,6 +23,10 @@ sig Transit extends Vehicle {
 
 sig Door{
     on: one Vehicle
+   ,whenInLockState: LockState -> one Time
+}{ 
+       time/ordering/first in {t: Time | t = whenInLockState[Locked]}
+       time/ordering/first not in {t: Time | t = whenInLockState[Unlocked]}
 }
 
 abstract sig Location {} 
@@ -47,8 +52,19 @@ one sig PassengerFront extends PositionalLocation{}{
 one sig PassengerSide extends PositionalLocation{}{
    side = Passenger
    position = Sliding
-} 
- //facts
+}
+
+//state
+enum LockState{
+     Locked
+    ,Unlocked
+}
+
+pred Door::unlockedBetween[t, t' : Time]{
+    t' in { s: Time | s = this.whenInLockState[Unlocked]}
+}
+
+//facts
 fact doorsAreOnTheirVehicle{
     all d: Door |
         all v: Vehicle |
@@ -73,6 +89,7 @@ fact locationsOnVehicles{
             l in v.locations
 }
 
+//Checks
 //The below should be true of the above:
 
 pred doorsOnAVehicle {
@@ -105,13 +122,36 @@ pred doorsAtLocationsOnTheirVehicle{
             d = d.on.doorAt[l] => l in d.on.locations
 }
 
-check validity{
+pred validStructure{
     doorsOnAVehicle
     doorsOnTheirVehicle
     doorsInALocation
     doorsInOneLocationOnly
     doorsAtLocationsOnTheirVehicle
-} for 1 Transit, 4 Door, 4 Location expect 0
+}
+
+pred doorsBeginDoubleLocked{
+    //Can't use domain restriction with enums, it looks like.
+    //Thus a set comprehension. Is that irksome enough to use a one sig instead?
+	all d: Door |
+       time/ordering/first in {t: Time | t = d.whenInLockState[Locked]}
+}
+
+pred doorsHaveOnlyOneStateAtATime{
+    all d: Door |
+        all s, s': LockState |
+            s != s' => d.whenInLockState[s] != d.whenInLockState[s']
+}
+
+pred doorStates{
+    doorsBeginDoubleLocked
+    doorsHaveOnlyOneStateAtATime 
+}
+
+check{
+    validStructure
+    doorStates
+} for 1 Transit, 4 Door, 4 Location, 2 Time expect 0
 
 //As  we should see demonstrated thus:
 
@@ -119,4 +159,4 @@ pred aTransit{
     0 < #Transit
 }
 
-run aTransit
+run aTransit for 1 Transit, 4 Door, 4 Location, 2 Time
