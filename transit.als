@@ -1,5 +1,4 @@
 open util/relation
-open util/time as time
 
 //structure
 abstract sig Vehicle{
@@ -23,10 +22,8 @@ sig Transit extends Vehicle {
 
 sig Door{
     on: one Vehicle
-   ,whenInLockState: LockState -> one Time
+   ,var lockState: one LockState
 }{ 
-       time/ordering/first in {t: Time | t = whenInLockState[Locked]}
-       time/ordering/first not in {t: Time | t = whenInLockState[Unlocked]}
 }
 
 abstract sig Location {} 
@@ -60,10 +57,6 @@ enum LockState{
     ,Unlocked
 }
 
-pred Door::unlockedBetween[t, t' : Time]{
-    t' in { s: Time | s = this.whenInLockState[Unlocked]}
-}
-
 //facts
 fact doorsAreOnTheirVehicle{
     all d: Door |
@@ -87,6 +80,11 @@ fact locationsOnVehicles{
     all l: Location |
         some v: Vehicle |
             l in v.locations
+}
+
+fact doorsAreLockedToBeginWith{
+    all d: Door |
+        d.lockState = Locked
 }
 
 //Checks
@@ -130,22 +128,14 @@ pred validStructure{
     doorsAtLocationsOnTheirVehicle
 }
 
-pred doorsBeginDoubleLocked{
-    //Can't use domain restriction with enums, it looks like.
-    //Thus a set comprehension. Is that irksome enough to use a one sig instead?
+pred doorsWereLocked{
 	all d: Door |
-       time/ordering/first in {t: Time | t = d.whenInLockState[Locked]}
+       d.lockState = Locked
 }
 
-pred doorsHaveOnlyOneStateAtATime{
-    all d: Door |
-        all s, s': LockState |
-            s != s' => d.whenInLockState[s] != d.whenInLockState[s']
-}
 
 pred doorStates{
-    doorsBeginDoubleLocked
-    doorsHaveOnlyOneStateAtATime 
+    doorsWereLocked
 }
 
 check{
