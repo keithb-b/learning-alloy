@@ -1,0 +1,10 @@
+module SimpleTestVehicle
+
+open Vehicle
+open Location   
+
+sig SimpleTestVehicle extends Vehicle {
+}{
+   locations in
+      Rear
+}
