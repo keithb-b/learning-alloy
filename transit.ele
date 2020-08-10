@@ -1,0 +1,14 @@
+module Transit
+
+open Vehicle
+open Location   
+
+sig Transit extends Vehicle {
+}{
+   locations in
+      Rear
+    + PassengerSide
+    + DriverFront
+    + PassengerFront
+}
+

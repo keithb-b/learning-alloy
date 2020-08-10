@@ -1,63 +1,10 @@
-open util/relation
+module VehicleLocking
 
-//structure
-abstract sig Vehicle{
-     doors: disj set Door
-    ,doorAt:  Location one -> one Door
-    ,locations: set Location
-}
+open Vehicle //includes Door
+open Location
+open Lock
+open Transit
 
-fun Vehicle::allDoorsOf: set Door{
-    ran[this.doorAt] //was it really worth abbreviating "range"?
-}     
-
-sig Transit extends Vehicle {
-}{
-   locations in
-      Rear
-    + PassengerSide
-    + DriverFront
-    + PassengerFront
-}
-
-sig Door{
-    on: one Vehicle
-   ,var lockState: one LockState
-}{ 
-}
-
-abstract sig Location {} 
-one sig Rear extends Location {}
-
-enum Side {Driver, Passenger}
-enum Place {Front, Sliding}
-abstract sig PositionalLocation extends Location{
-     side: Side
-    ,position: Place
-}
-
-one sig DriverFront extends PositionalLocation{}{
-    side = Driver
-    position = Front
-}
-
-one sig PassengerFront extends PositionalLocation{}{
-    side = Passenger
-    position = Front
-}
-
-one sig PassengerSide extends PositionalLocation{}{
-   side = Passenger
-   position = Sliding
-}
-
-//state
-enum LockState{
-     Locked
-    ,Unlocked
-}
-
-//facts
 fact doorsAreOnTheirVehicle{
     all d: Door |
         all v: Vehicle |
@@ -134,13 +81,22 @@ pred doorsWereLocked{
 }
 
 
-pred doorStates{
+pred initalDoorStates{
     doorsWereLocked
+}
+
+pred doorStateMachine{
+    all d: Door | {
+        historically locked[d]
+        unlockCommanded[d]
+        eventually unlocked[d]
+    }     
 }
 
 check{
     validStructure
-    doorStates
+    initalDoorStates
+    doorStateMachine
 } for 1 Transit, 4 Door, 4 Location, 2 Time expect 0
 
 //As  we should see demonstrated thus:

@@ -1,0 +1,6 @@
+module Lock
+
+enum LockState{
+     Locked
+    ,Unlocked
+}

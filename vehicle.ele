@@ -1,0 +1,33 @@
+module Vehicle
+
+open Lock
+open Location
+open util/relation 
+
+abstract sig Vehicle{
+     doors: disj set Door
+    ,doorAt:  Location one -> one Door
+    ,locations: set Location
+}
+
+sig Door{
+    on: one Vehicle
+   ,var lockState: one LockState
+}{ 
+}
+
+pred Door::locked {
+    this.lockState = Locked
+}
+
+pred Door::unlocked {
+    this.lockState = Unlocked
+}
+
+pred Door::unlockCommanded {
+    eventually this.unlocked
+}
+
+fun Vehicle::allDoorsOf: set Door{
+    ran[this.doorAt] //was it really worth abbreviating "range"?
+} 
