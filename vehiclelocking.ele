@@ -5,7 +5,7 @@ open Location
 open Lock
 open Transit
 
-open SimpleVehicle
+open SimpleTestVehicle
 
 fact doorsAreOnTheirVehicle{
     all d: Door |
@@ -99,7 +99,7 @@ check {
     validStructure
     initalDoorStates
     doorStateMachine
-} for 1 SimpleVehicle, 4 Door, 4 Location, 2 Time expect 0
+} for 1 Vehicle, 4 Door, 4 Location, 2 Time expect 0
 
 //As  we should see demonstrated thus:
 
@@ -112,6 +112,6 @@ pred aSimple{
     0 < #Transit
 }
 
-run aTransit for 1 Transit, 4 Door, 4 Location, 2 Time
+run aTransit for 1 Vehicle, 4 Door, 4 Location, 2 Time
 
-run aSimple for 1 SimpleVehicle, 4 Door, 4 Location, 2 Time
+run aSimple for 1 Vehicle, 4 Door, 4 Location, 2 Time
