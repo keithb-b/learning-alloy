@@ -38,6 +38,10 @@ fact initalState{
 //Checks
 //The below should be true of the above:
 
+pred vehiclesHavePlaces{
+    all v: Vehicle |  v.locations != none
+}
+ 
 pred doorsOnAVehicle {
     all d: Door |
         one v: Vehicle |
@@ -68,6 +72,7 @@ pred doorsAtLocationsOnTheirVehicle{
 }
 
 pred validStructure{
+    vehiclesHavePlaces
     doorsOnAVehicle
     doorsOnTheirVehicle
     doorsInALocation
@@ -87,7 +92,7 @@ check vehicleModel{
 //As  we should see demonstrated thus:
 
 pred aTransit{
-    0 < #Transit
+   1 < #Transit
 }
 
-run aTransit for 1 Vehicle, 4 Door, 4 Location, 2 Time
+run aTransit for 2 Vehicle, 8 Door, 4 Location, 2 Time
