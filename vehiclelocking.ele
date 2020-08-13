@@ -12,9 +12,7 @@ fact doorsAreOnTheirVehicle{
 }
 
 fact doorsAreLocatedOnOneVehicleOnly{
-    all d: Door |
-        all v, u: Vehicle | 
-            d in v.doors and d in u.doors <=> v = u
+    Vehicle<:doors in Vehicle one -> Door //seems to be the idiom, lots to unpack here
 }
 
 fact doorsAreInOneLocationOnly{
