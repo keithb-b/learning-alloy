@@ -1,0 +1,95 @@
+open util/ordering[Key] as ko
+
+sig Key{}
+
+sig Room{
+     keys: set Key
+    ,var currentKey: one keys //is the "one" redundant? No, because keys isn't Keys.
+}
+
+fact disjointKeySets{
+    // the paper says this-- 
+    //   keys in Room lone -> Key 
+    // which doesn't compile
+    all k: Key |
+        all r0, r1: Room | 
+            k in r0.keys and k in r1.keys <=> r0 = r1
+}
+
+sig Guest{
+    var keys: Key
+}
+
+one sig FrontDesk{ //singleton! yuck!
+     var lastKey: Room -> lone Key //better as "current" key? or "most recent" key?
+    ,var occupant: Room -> Guest //many-to-many?
+}
+
+fun nextKey[k: Key, ks: set Key]: set Key{ //the key generator shared by Front Desk and the door controller
+    min[k.nexts & ks] //recall that & is intersection (reasonably enough)
+}
+
+pred entry[g: Guest, r: Room, k: Key]{ //predicate representing an occurence between two instants
+    k in g.keys //k has to be a key for g
+    k = r.currentKey or k = nextKey[r.currentKey, r.keys] //the current key works, and so does the next one
+    r.currentKey' = k //at the next instant, k (old or new) is the current key of r
+    all rr: Room - r |
+       rr.currentKey' = rr.currentKey //at the next instant, all other rooms have the same key they have now
+    g.keys' = g.keys //at the next instant, gkeys is as before. not scoped in the paper! (missing the '.')
+    FrontDesk.lastKey' = FrontDesk.lastKey //front desk record of keys are not changed by entering the room 
+    FrontDesk.occupant' = FrontDesk.occupant //front desk record of occupants also unchanged
+}
+
+
+//these two predicates were not in the paper, so I'm busking. Why do academics do this?
+
+pred checkIn[g: Guest, r: Room, k: Key]{ 
+    k' = nextKey[r.currentKey, r.keys] // new key issued, k or k'?
+    r.currentKey' = k' //at the next instant, new k is the current key of r
+    all rr: Room - r |
+       rr.currentKey' = rr.currentKey //at the next instant, all other rooms have the same key they have now
+    g.keys' = g.keys + k' //guest gets new key. k'?
+    FrontDesk.lastKey' = FrontDesk.lastKey ++ r -> k //front desk record of keys is changed by entering the room 
+    FrontDesk.occupant' = FrontDesk.occupant ++ r -> g //front desk record of occupants is changed
+}
+
+
+pred checkOut[g: Guest, r: Room, k: Key]{ 
+    r.currentKey' = r.currentKey // room key does not change
+    all rr: Room - r |
+       rr.currentKey' = rr.currentKey //at the next instant, all other rooms have the same key they have now
+    g.keys' = g.keys - k //guest loses their key to the room
+    FrontDesk.lastKey' = FrontDesk.lastKey - r -> k' //front desk record of keys is changed by entering the room 
+    FrontDesk.occupant' = FrontDesk.occupant - r-> g //front desk record of occupants is changed
+}
+
+//back to the paper
+pred init{
+    no Guest.keys //no "all" required?
+    no FrontDesk.occupant
+    all r: Room |
+        FrontDesk.lastKey[r] = r.currentKey
+}
+
+fact trace {
+    init
+    always some g: Guest, r: Room, k: Key |
+            entry[g, r, k] or checkIn[g, r, k] or checkOut[g, r, k]
+}
+
+assert noBadEntry{
+    always all r: Room, g: Guest, k: Key |
+            entry[g, r, k] and some FrontDesk.occupant[r] =>
+               g in FrontDesk.occupant[r]
+}
+
+check noBadEntry for 3 but 5 Time
+
+//busking again
+pred someTrace{
+    some g: Guest, r: Room, k: Key |
+        checkIn[g, r, k] and entry[g, r, k] and checkOut[g, r, k]
+}
+
+run someTrace for 3 but 7 Time
+            
