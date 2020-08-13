@@ -29,9 +29,12 @@ fact locationsOnVehicles{
             l in v.locations
 }
 
-fact doorsAreLockedToBeginWith{
-    all d: Door |
-        d.lockState = Locked
+pred doorsAreLocked{
+    all d: Door | d.lockState = Locked
+}
+
+fact initalState{
+	doorsAreLocked
 }
 
 //Checks
@@ -44,8 +47,7 @@ pred doorsOnAVehicle {
 }
 
 pred doorsOnTheirVehicle{
-    all d: Door |
-            d in d.on.doors
+    all d: Door | d in d.on.doors
 }
 
 pred doorsInALocation{
@@ -75,28 +77,13 @@ pred validStructure{
     doorsAtLocationsOnTheirVehicle
 }
 
-pred doorsWereLocked{
-	all d: Door |
-       d.lockState = Locked
+pred consistentBehaviour{
+
 }
 
-
-pred initalDoorStates{
-    doorsWereLocked
-}
-
-pred doorStateMachine{
-    all d: Door | {
-        historically locked[d]
-        unlockCommanded[d]
-        eventually unlocked[d]
-    }     
-}
-
-check {
+check vehicleModel{
     validStructure
-    initalDoorStates
-    doorStateMachine
+    consistentBehaviour
 } for 1 Vehicle, 4 Door, 4 Location, 2 Time expect 0
 
 //As  we should see demonstrated thus:
