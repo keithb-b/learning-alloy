@@ -5,8 +5,6 @@ open Location
 open Lock
 open Transit
 
-open SimpleTestVehicle
-
 fact doorsAreOnTheirVehicle{
     all d: Door |
         all v: Vehicle |
@@ -107,11 +105,4 @@ pred aTransit{
     0 < #Transit
 }
 
-
-pred aSimple{
-    0 < #Transit
-}
-
 run aTransit for 1 Vehicle, 4 Door, 4 Location, 2 Time
-
-run aSimple for 1 Vehicle, 4 Door, 4 Location, 2 Time
