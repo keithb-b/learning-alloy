@@ -5,10 +5,6 @@ open Location
 open Lock
 open Transit
 
-fact doorsAreLocatedOnOneVehicleOnly{
-    Vehicle<:doors in Vehicle one -> Door //seems to be the idiom, lots to unpack here
-}
-
 fact doorsAreInOneLocationOnly{
     all v: Vehicle |
         all l, m: v.locations | 
@@ -32,14 +28,15 @@ fact initalState{
 //Checks
 //The below should be true of the above:
 
-pred vehiclesHavePlaces{
+pred vehiclesHavePlacesForDoors{
     all v: Vehicle |  v.locations != none
 }
- 
+
+
 pred doorsOnAVehicle {
     all d: Door |
         one v: Vehicle |
-            d in v.doors
+            d in v.allDoors
 }
 
 pred doorsInALocation{
@@ -51,12 +48,12 @@ pred doorsInALocation{
 
 pred doorsInOneLocationOnly{
     all v: Vehicle |
-        all d: v.doors |
+        all d: v.allDoors |
             #(v.doorAt :> d) = 1
 }
 
 pred validStructure{
-    vehiclesHavePlaces
+    vehiclesHavePlacesForDoors
     doorsOnAVehicle
     doorsInALocation
     doorsInOneLocationOnly

@@ -5,11 +5,10 @@ open Door
 open util/relation 
 
 abstract sig Vehicle{
-     doors: disj set Door
-    ,doorAt:  Location one -> one Door
+     doorAt:  Location one -> one Door
     ,locations: set Location
 }
 
-fun Vehicle::allDoorsOf: set Door{
+fun Vehicle::allDoors: set Door{
     ran[this.doorAt] //was it really worth abbreviating "range"?
 } 
