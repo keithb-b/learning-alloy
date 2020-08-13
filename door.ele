@@ -1,15 +1,13 @@
 module Door
 
-open Vehicle
 open Lock
 
 sig Door{
-    on: one Vehicle
    ,var lockState: one LockState
 }{ 
 }
 
-pred Door::isLocked {
+pred Door::locked {
     this.lockState = Locked
 }
 
@@ -18,5 +16,5 @@ pred Door::unlocked {
 }
 
 pred Door::unlockCommanded {
-    this'.unlocked
+    eventually this.unlocked
 }
