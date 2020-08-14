@@ -11,14 +11,25 @@ fact doorsAreInOneLocationOnly{
                 v.doorAt[l] = v.doorAt[m] <=> l = m 
 }
 
-fact locationsOnVehicles{
+
+/*fact doorsAreOnOneVehicleOnly{
+    all disj v, u: Vehicle |
+        none = v.allDoors & u.allDoors
+}
+
+not sure whether I prefer this idiom above, or the one below. Neither work, it seems. Cannot instanciate a model with two vans
+*/
+
+fact doorsAreOnOneVehicleOnly{
+    all d: Door |
+        all v, u: Vehicle |
+            d in v.allDoors and d in u.allDoors <=> v = u
+}
+
+fact noUnneededLocations{
     all l: Location |
         some v: Vehicle |
             l in v.locations
-}
-
-pred doorsAreLocked{
-    all d: Door | d.lockState = Locked
 }
 
 fact initalState{
@@ -46,32 +57,41 @@ pred doorsInALocation{
                 d = v.doorAt[l]
 }
 
+pred doorsOnOneVehicle{
+    all d: Door |
+        1 = #{v: Vehicle | d in v.allDoors}
+} 
+
 pred doorsInOneLocationOnly{
     all v: Vehicle |
         all d: v.allDoors |
             #(v.doorAt :> d) = 1
 }
 
+pred doorsAreLocked{
+    all d: Door | d.lockState = Locked
+}
+
+//it's a shame that we can't organize assertions this way, too. [or can we!?]
 pred validStructure{
     vehiclesHavePlacesForDoors
     doorsOnAVehicle
+    doorsOnOneVehicle
     doorsInALocation
     doorsInOneLocationOnly
 }
 
 pred consistentBehaviour{
-
+    doorsAreLocked
 }
 
-check vehicleModel{
+pred vehicleModel{
     validStructure
     consistentBehaviour
-} for 2 Vehicle, 8 Door, 4 Location, 2 Time expect 0
+}
+
+check theModelAsChecked{vehicleModel} for exactly 2 Transit, 8 Door, 4 Location, 2 Time expect 0 //counterexamples
 
 //As  we should see demonstrated thus:
 
-pred aTransit{
-   1 < #Transit
-}
-
-run aTransit for 2 Vehicle, 8 Door, 4 Location, 2 Time
+run theModelAsRun{vehicleModel} for exactly 2 Transit, 8 Door, 4 Location, 2 Time
