@@ -2,13 +2,13 @@ module Vehicle
 
 open Location
 open Door
-open util/relation 
 
 abstract sig Vehicle{
-     doorAt:  Location one -> one Door
-    ,locations: set Location
+      locations: set Location
+     ,doors: set Door
+     ,doorAt: locations one -> one doors
+}{
+    //Jackson style 
+    doors = Location.doorAt
 }
 
-fun Vehicle::allDoors: set Door{
-    ran[this.doorAt] //was it really worth abbreviating "range"?
-} 
