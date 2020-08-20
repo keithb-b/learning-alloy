@@ -3,15 +3,18 @@ title: behaviour of vehuicle locking system
 layout: default
 description: concrete example drawn from 2019 Ford Transit users handbook
 ---
+
 ```alloy
 module VehicleLocking
 
-open Vehicle //includes Door
+open Vehicle //includes RemoteFob, opens Door, 
 open Location
 open Lock
 open Transit
 
-//global facts
+```
+##cross-module facts
+```alloy
 fact doorsAreOnOneVehicleOnly{
     doors in Vehicle one -> Door
 }
@@ -22,8 +25,12 @@ fact noUnneededLocations{
             l in v.locations
 }
 
-//Checks
-//The below should be true of the above:
+fact fobsAndVehiclesArePaired{
+}
+```
+##Checks
+The below should be true of the above:
+```alloy
 pred aVehicleHasLocationsForDoors{
     all v: Vehicle |  v.locations != none
 }
@@ -56,13 +63,21 @@ pred doorsChangeStateTogether{
     all v: Vehicle | 
         no v.doors.lockState :> Locked or
         no v.doors.lockState :> Unlocked
-}    
+}
+
+pred aFobWorksOnlyOneVehicle{
+    all v: Vehicle |
+        all f: RemoteFob |
+            v.fob = f <=> f.vehicle = v
+}       
 
 //it's a shame that we can't organize assertions this way, too. [or can we!?]
 pred validStructure{
     aVehicleHasLocationsForDoors
     aDoorBelongsToAVehicle
     aDoorIsInOneLocationOnly
+
+    aFobWorksOnlyOneVehicle
 }
 
 pred consistentBehaviour{
@@ -74,9 +89,10 @@ pred vehicleModel{
     consistentBehaviour
 }
 
-check theModelAsChecked{vehicleModel} for exactly 2 Transit, 8 Door, 4 Location expect 0 //counterexamples
-
-//traces
+check theModelAsChecked{vehicleModel} for exactly 2 Transit, 2 RemoteFob, 8 Door, 4 Location expect 0 //counterexamples
+```
+##Behaviour
+```alloy
 
 pred doorsAreLocked{
     all v: Vehicle |
@@ -90,10 +106,10 @@ pred begin{
 
 pred someValidChanges{
     always {
-         some v: Vehicle |
-             (v.lockCommanded   and all vv: Vehicle - v | vv.unchanged) or
-             (v.unlockCommanded and all vv: Vehicle - v | vv.unchanged) or
-             v.unchanged
+         some f: RemoteFob |
+             (f.lockCommanded   and f.vehicle.allDoorsLocked   and all vv: Vehicle - f.vehicle | vv.unchanged) or
+             (f.unlockCommanded and f.vehicle.allDoorsUnlocked and all vv: Vehicle - f.vehicle | vv.unchanged) or
+             f.vehicle.unchanged
     }
 }
 
@@ -110,6 +126,6 @@ pred trace{
 }
 
 //As  we should see demonstrated thus:
-run singleVanBehaviour{trace} for exactly 1 Transit, 8 Door, 4 Location, 4 Time
-run multipleVanBehaviour{trace} for exactly 2 Transit, 8 Door, 4 Location, 4 Time
+//run singleVanBehaviour{trace} for exactly 1 Transit, 1 RemoteFob, 8 Door, 4 Location, 4 Time
+run multipleVanBehaviour{trace} for exactly 2 Transit, 2 RemoteFob, 8 Door, 4 Location, 4 Time
 ```
