@@ -1,8 +1,6 @@
 ---
-title: behaviour of vehuicle locking system
-layout: default
-description: concrete example drawn from 2019 Ford Transit users handbook
 ---
+# Behaviour of a vehicle locking system
 
 ```alloy
 module VehicleLocking
@@ -28,8 +26,10 @@ fact noUnneededLocations{
 fact fobsAndVehiclesArePaired{
 }
 ```
-##Checks
-The below should be true of the above:
+
+## Checks
+The below claims should be true of the above model:
+
 ```alloy
 pred aVehicleHasLocationsForDoors{
     all v: Vehicle |  v.locations != none
@@ -88,6 +88,10 @@ pred vehicleModel{
     validStructure
     consistentBehaviour
 }
+```
+Concrete example drawn from 2019 Ford Transit users handbook.
+
+```alloy
 
 check theModelAsChecked{vehicleModel} for exactly 2 Transit, 2 RemoteFob, 8 Door, 4 Location expect 0 //counterexamples
 ```
@@ -107,8 +111,9 @@ pred begin{
 pred someValidChanges{
     always {
          some f: RemoteFob |
-             (f.lockCommanded   and f.vehicle.allDoorsLocked   and all vv: Vehicle - f.vehicle | vv.unchanged) or
-             (f.unlockCommanded and f.vehicle.allDoorsUnlocked and all vv: Vehicle - f.vehicle | vv.unchanged) or
+            let v = f.vehicle |
+             (f.lockCommanded   and v.allDoorsLocked   and allVehiclesUnchagedExcept[v] ) or
+             (f.unlockCommanded and v.allDoorsUnlocked and allVehiclesUnchagedExcept[v]) or
              f.vehicle.unchanged
     }
 }
@@ -128,4 +133,10 @@ pred trace{
 //As  we should see demonstrated thus:
 //run singleVanBehaviour{trace} for exactly 1 Transit, 1 RemoteFob, 8 Door, 4 Location, 4 Time
 run multipleVanBehaviour{trace} for exactly 2 Transit, 2 RemoteFob, 8 Door, 4 Location, 4 Time
+
+```
+## Utilities
+
+```alloy
+let allVehiclesUnchagedExcept[v] = all vv: Vehicle - v | vv.unchanged 
 ```
