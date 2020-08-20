@@ -5,6 +5,7 @@ open Location
 open Lock
 open Transit
 
+//global facts
 fact doorsAreOnOneVehicleOnly{
     doors in Vehicle one -> Door
 }
