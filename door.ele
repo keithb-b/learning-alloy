@@ -8,24 +8,24 @@ sig Door{
 }
 
 //actions
-pred unlockCommanded[d: Door]{
-    d.lockState' = Unlocked
+pred Door::unlockCommanded{
+    this.lockState' = Unlocked
 }
 
-pred lockCommanded[d: Door]{
-    d.lockState' = Locked
+pred Door::lockCommanded{
+    this.lockState' = Locked
 }
 
-pred unchanged[d: Door]{
-    d.lockState' = d.lockState
+pred Door::unchanged{
+    this.lockState' = this.lockState
 }
 
 //observations
-pred locked[d: Door]{
-    d.lockState = Locked
+pred  Door::locked{
+    this.lockState = Locked
 }
 
-pred unlocked[d: Door]{
-    d.lockState = Unlocked
+pred Door::unlocked{
+    this.lockState = Unlocked
 }
 

@@ -8,7 +8,6 @@ abstract sig Vehicle{
      ,doors: some Door
      ,doorAt: locations one -> one doors
 }{
-    //Jackson style 
     doors = Location.doorAt
     doors.lockState = {Locked} or doors.lockState = {Unlocked}
 }
@@ -16,17 +15,17 @@ abstract sig Vehicle{
 // actions
 pred Vehicle::lockCommanded{
     all d: this.doors |
-        lockCommanded[d]
+        d.lockCommanded
 }
 
 pred Vehicle::unlockCommanded{
     all d: this.doors |
-        unlockCommanded[d]
+        d.unlockCommanded
 }
 
 pred Vehicle::unchanged{
     all d: this.doors |
-        unchanged[d]
+        d.unchanged
 }
 
 //observations
