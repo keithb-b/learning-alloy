@@ -4,11 +4,36 @@ open Location
 open Door
 
 abstract sig Vehicle{
-      locations: set Location
-     ,doors: set Door
+     ,locations: some Location
+     ,doors: some Door
      ,doorAt: locations one -> one doors
 }{
     //Jackson style 
     doors = Location.doorAt
+    doors.lockState = {Locked} or doors.lockState = {Unlocked}
 }
 
+// actions
+pred Vehicle::lockCommanded{
+    all d: this.doors |
+        lockCommanded[d]
+}
+
+pred Vehicle::unlockCommanded{
+    all d: this.doors |
+        unlockCommanded[d]
+}
+
+pred Vehicle::unchanged{
+    all d: this.doors |
+        unchanged[d]
+}
+
+//observations
+pred Vehicle::allDoorsLocked{
+    no {Unlocked} & this.doors.lockState
+} 
+
+pred Vehicle::allDoorsUnlocked{
+    no {Locked} & this.doors.lockState
+}

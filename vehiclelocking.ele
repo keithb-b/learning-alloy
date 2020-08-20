@@ -6,7 +6,6 @@ open Lock
 open Transit
 
 fact doorsAreOnOneVehicleOnly{
-    //Jackson style
     doors in Vehicle one -> Door
 }
 
@@ -16,17 +15,11 @@ fact noUnneededLocations{
             l in v.locations
 }
 
-fact initalState{
-	doorsAreLocked
-}
-
 //Checks
 //The below should be true of the above:
-
 pred aVehicleHasLocationsForDoors{
     all v: Vehicle |  v.locations != none
 }
-
 
 pred aDoorBelongsToAVehicle{
     all d: Door |
@@ -49,23 +42,24 @@ pred aDoorIsOnOneVehicleOnly{
 pred aDoorIsInOneLocationOnly{
     all v: Vehicle |
         all d: v.doors |
-            #(v.doorAt :> d) = 1
+            one v.doorAt :> d
 }
 
-pred doorsAreLocked{
-    all d: Door | d.lockState = Locked
-}
+pred doorsChangeStateTogether{
+    all v: Vehicle | 
+        no v.doors.lockState :> Locked or
+        no v.doors.lockState :> Unlocked
+}    
 
 //it's a shame that we can't organize assertions this way, too. [or can we!?]
 pred validStructure{
     aVehicleHasLocationsForDoors
     aDoorBelongsToAVehicle
-    aDoorIsOnOneVehicleOnly
     aDoorIsInOneLocationOnly
 }
 
 pred consistentBehaviour{
-    doorsAreLocked
+    doorsChangeStateTogether
 }
 
 pred vehicleModel{
@@ -73,8 +67,43 @@ pred vehicleModel{
     consistentBehaviour
 }
 
-check theModelAsChecked{vehicleModel} for exactly 2 Transit, 8 Door, 4 Location, 2 Time expect 0 //counterexamples
+check theModelAsChecked{vehicleModel} for exactly 2 Transit, 8 Door, 4 Location expect 0 //counterexamples
+
+//traces
+
+pred doorsAreLocked{
+    all v: Vehicle |
+        all d: v.doors |
+            d.locked
+}
+
+pred begin{
+    doorsAreLocked
+}
+
+pred someValidChanges{
+    always {
+         some v: Vehicle |
+             (v.lockCommanded   and all vv: Vehicle - v | vv.unchanged) or
+             (v.unlockCommanded and all vv: Vehicle - v | vv.unchanged) or
+             v.unchanged
+    }
+}
+
+pred targetState{
+    eventually {
+        all d: Door | d.unlocked
+    }
+}
+
+pred trace{
+    begin
+    someValidChanges
+    targetState
+}
 
 //As  we should see demonstrated thus:
+run singleVanBehaviour{trace} for exactly 1 Transit, 8 Door, 4 Location, 4 Time
+run multipleVanBehaviour{trace} for exactly 2 Transit, 8 Door, 4 Location, 4 Time
 
-run theModelAsRun{vehicleModel} for exactly 2 Transit, 8 Door, 4 Location, 2 Time
+

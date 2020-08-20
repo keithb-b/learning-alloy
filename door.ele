@@ -3,18 +3,29 @@ module Door
 open Lock
 
 sig Door{
-   ,var lockState: one LockState
-}{ 
+   var lockState: LockState
+}{
 }
 
-pred Door::locked {
-    this.lockState = Locked
+//actions
+pred unlockCommanded[d: Door]{
+    d.lockState' = Unlocked
 }
 
-pred Door::unlocked {
-    this.lockState = Unlocked
+pred lockCommanded[d: Door]{
+    d.lockState' = Locked
 }
 
-pred Door::unlockCommanded {
-    eventually this.unlocked
+pred unchanged[d: Door]{
+    d.lockState' = d.lockState
 }
+
+//observations
+pred locked[d: Door]{
+    d.lockState = Locked
+}
+
+pred unlocked[d: Door]{
+    d.lockState = Unlocked
+}
+
