@@ -23,8 +23,6 @@ fact noUnneededLocations{
             l in v.locations
 }
 
-fact fobsAndVehiclesArePaired{
-}
 ```
 
 ## Checks
@@ -63,21 +61,13 @@ pred doorsChangeStateTogether{
     all v: Vehicle | 
         no v.doors.lockState :> Locked or
         no v.doors.lockState :> Unlocked
-}
-
-pred aFobWorksOnlyOneVehicle{
-    all v: Vehicle |
-        all f: RemoteFob |
-            v.fob = f <=> f.vehicle = v
-}       
+}   
 
 //it's a shame that we can't organize assertions this way, too. [or can we!?]
 pred validStructure{
     aVehicleHasLocationsForDoors
     aDoorBelongsToAVehicle
     aDoorIsInOneLocationOnly
-
-    aFobWorksOnlyOneVehicle
 }
 
 pred consistentBehaviour{
@@ -112,7 +102,7 @@ pred someValidChanges{
     always {
          some f: RemoteFob |
             let v = f.vehicle |
-             (f.lockCommanded   and v.allDoorsLocked   and allVehiclesUnchagedExcept[v] ) or
+             (f.lockCommanded   and v.allDoorsLocked   and allVehiclesUnchagedExcept[v]) or
              (f.unlockCommanded and v.allDoorsUnlocked and allVehiclesUnchagedExcept[v]) or
              f.vehicle.unchanged
     }
