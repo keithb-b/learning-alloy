@@ -9,7 +9,14 @@ open Door
 open Zone
 ```
 ## Vehicles
-This `sig` models the structure of vehicles in general. A specific kind of vehicle should extend this and constrain `locations` and `locationsByZones` appropriately.
+This `sig` models the structure of vehicles in general. A specific kind of vehicle should extend this and constrain:
+
+* `locations` 
+* `zones`
+* `locationsByZones` 
+* `unlockEffects`
+
+appropriately for the behaviour of that kind of vehicle.
 
 ```alloy
 abstract sig Vehicle{
@@ -20,11 +27,14 @@ abstract sig Vehicle{
     ,zones: some Zone
     ,locationsByZones: zones one -> some locations
     ,doorsInZone: zones one -> some doors
+    ,unlockEffects: set Zone
 }{
     doors = Location.doorAt
     doors.lockState = {Locked} or doors.lockState = {Unlocked}
     doorsInZone = locationsByZones.doorAt
 }
+
+
 ```
 ### Actions
 ```alloy
@@ -34,8 +44,11 @@ pred Vehicle::lockCommanded{
 }
 
 pred Vehicle::unlockCommanded{
-    all d: this.doors |
-        d.unlockCommanded
+    all d: this.doors | 
+        d in this.doorsInZone[this.unlockEffects] implies 
+            d.unlockCommanded 
+        else
+            d.unchanged
 }
 
 pred Vehicle::unchanged{
@@ -53,6 +66,14 @@ pred Vehicle::allDoorsLocked{
 pred Vehicle::allDoorsUnlocked{
     no {Locked} & this.doors.lockState
 }
+
+pred Vehicle::peopleDoorsUnlockedOnly{
+    let peopleDoors = this.doorsInZone[People] | {
+        peopleDoors.lockState' = {Unlocked}
+        all d: this.doors - peopleDoors | d.unchanged
+    }
+}
+
 ```
 
 ## Remote Fobs

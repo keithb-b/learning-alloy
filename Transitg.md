@@ -24,5 +24,7 @@ sig Transit extends Vehicle {
       People -> PassengerFront +
       RearCargo -> Rear +
       OtherCargo -> PassengerSide
+
+    unlockEffects = People or unlockEffects = People + Cargo
 }
 ```

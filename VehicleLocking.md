@@ -95,10 +95,11 @@ pred validStructure{
 
 ```alloy
 
-pred doorsChangeStateTogether{
-    all v: Vehicle | 
-        no v.doors.lockState :> Locked or
-        no v.doors.lockState :> Unlocked
+pred doorsInAZoneHaveTheSameLockState{
+    all v: Vehicle |
+        all z: v.zones | 
+           no v.doorsInZone[z].lockState :> Locked or
+           no v.doorsInZone[z].lockState :> Unlocked
 }
 
 pred doorsChangeStateOnlyOnFobCommands{
@@ -108,12 +109,13 @@ pred doorsChangeStateOnlyOnFobCommands{
                d.unchanged until f.unlockCommanded or f.lockCommanded        
 }
 
+
 ```
 collecting all that together for convenience:
 
 ```alloy
 pred consistentBehaviour{
-    doorsChangeStateTogether
+    doorsInAZoneHaveTheSameLockState
     doorsChangeStateOnlyOnFobCommands
 }
 
@@ -132,23 +134,24 @@ check theModelAsChecked{vehicleLockingModel} for exactly 2 Transit, 2 RemoteFob,
 
 ```alloy
 
-pred doorsAreLocked{
-    all v: Vehicle |
-        all d: v.doors |
-            d.locked
-}
-
 pred begin{
-    doorsAreLocked
+    all d: Door |
+            d.locked
 }
 
 pred someValidChanges{
     always {
          some f: RemoteFob |
             let v = f.vehicle |
-             (f.lockCommanded   and v.allDoorsLocked   and allVehiclesUnchagedExcept[v]) or
-             (f.unlockCommanded and v.allDoorsUnlocked and allVehiclesUnchagedExcept[v]) or
-             f.vehicle.unchanged
+                 v.unlockEffects = People + Cargo => (
+                     (f.lockCommanded   and v.allDoorsLocked   and allVehiclesUnchagedExcept[v]) or
+                     (f.unlockCommanded and v.allDoorsUnlocked and allVehiclesUnchagedExcept[v]) or
+                     f.vehicle.unchanged)
+                 or 
+                 v.unlockEffects = People => (
+                     (f.lockCommanded   and v.allDoorsLocked          and allVehiclesUnchagedExcept[v]) or
+                     (f.unlockCommanded and v.peopleDoorsUnlockedOnly and allVehiclesUnchagedExcept[v]) or
+                     f.vehicle.unchanged)
     }
 }
 
