@@ -2,6 +2,8 @@
 ---
 # Behaviour of a vehicle locking system
 
+Concrete example drawn from 2019 Ford Transit users handbook.
+
 ```alloy
 module VehicleLocking
 
@@ -28,6 +30,7 @@ fact noUnneededLocations{
 ## Checks
 The below claims should be true of the above model:
 
+### Structure
 ```alloy
 pred aVehicleHasLocationsForDoors{
     all v: Vehicle |  v.locations != none
@@ -75,8 +78,10 @@ pred aCargoZoneContainsTheDoorsForCargo{
       all l: v.locations |
           l.purpose in ForCargo => some z: v.zones | z in Cargo and l in v.locationsByZones[z]
 }
+```
+collecting all that together for convenience:
 
-//it's a shame that we can't organize assertions this way, too. [or can we!?]
+```alloy
 pred validStructure{
     aVehicleHasLocationsForDoors
     aDoorBelongsToAVehicle
