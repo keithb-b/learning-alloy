@@ -1,0 +1,124 @@
+<?xml version="1.0"?>
+<alloy>
+
+<view>
+
+<defaultnode/>
+
+<defaultedge/>
+
+<node>
+   <type name="Int"/>
+   <type name="String"/>
+   <type name="univ"/>
+   <type name="Location/Driver"/>
+   <type name="Location/DriverFront"/>
+   <type name="Location/ForCargo"/>
+   <type name="Location/ForPeople"/>
+   <type name="Location/Front"/>
+   <type name="Location/Passenger"/>
+   <type name="Location/PassengerFront"/>
+   <type name="Location/PassengerSide"/>
+   <type name="Location/PositionalLocation"/>
+   <type name="Location/Rear"/>
+   <type name="Location/Sliding"/>
+   <type name="seq/Int"/>
+   <type name="Location/open$3/Ord"/>
+   <type name="Location/open$4/Ord"/>
+   <type name="Location/ordering/Ord"/>
+</node>
+
+<node color="Red" label="Locked">
+   <type name="Lock/Locked"/>
+</node>
+
+<node label="Door">
+   <type name="Vehicle/Door/Door"/>
+</node>
+
+<node label="Transit">
+   <type name="Transit/Transit"/>
+</node>
+
+<node label="Zone/OtherCargo">
+   <type name="Vehicle/Zone/OtherCargo"/>
+</node>
+
+<node label="Zone/People">
+   <type name="Vehicle/Zone/People"/>
+</node>
+
+<node label="Zone/RearCargo">
+   <type name="Vehicle/Zone/RearCargo"/>
+</node>
+
+<node numberatoms="yes" label="Zone/Cargo">
+   <type name="Vehicle/Zone/Cargo"/>
+</node>
+
+<node shape="Dbl Octagon" color="Yellow">
+   <type name="Vehicle/Vehicle"/>
+</node>
+
+<node shape="Egg" label="RemoteFob">
+   <type name="Vehicle/RemoteFob"/>
+</node>
+
+<node shape="Inv Trapezoid" label="Unlocked">
+   <type name="Lock/Unlocked"/>
+</node>
+
+<node shape="Trapezoid" color="Green">
+   <type name="Lock/LockState"/>
+</node>
+
+<node style="Dotted" label="Zone">
+   <type name="Vehicle/Zone/Zone"/>
+</node>
+
+<node visible="no" shape="Ellipse" color="Blue">
+   <type name="Location/Location"/>
+</node>
+
+<node visible="no" style="Dotted" shape="Ellipse" color="Blue">
+   <type name="Location/Place"/>
+   <type name="Location/Side"/>
+</node>
+
+<node visible="no" style="Dotted" shape="Ellipse" color="Blue" label="Purpose">
+   <type name="Location/Purpose"/>
+</node>
+
+<edge style="Dotted">
+   <relation name="position"> <type name="Location/PositionalLocation"/> <type name="Location/Place"/> </relation>
+   <relation name="purpose"> <type name="Location/Location"/> <type name="Location/Purpose"/> </relation>
+   <relation name="side"> <type name="Location/PositionalLocation"/> <type name="Location/Side"/> </relation>
+</edge>
+
+<edge style="Dotted" visible="no">
+   <relation name="zones"> <type name="Vehicle/Vehicle"/> <type name="Vehicle/Zone/Zone"/> </relation>
+</edge>
+
+<edge visible="no">
+   <relation name="doorAt"> <type name="Vehicle/Vehicle"/> <type name="Location/Location"/> <type name="Vehicle/Door/Door"/> </relation>
+   <relation name="doors"> <type name="Vehicle/Vehicle"/> <type name="Vehicle/Door/Door"/> </relation>
+   <relation name="locations"> <type name="Vehicle/Vehicle"/> <type name="Location/Location"/> </relation>
+   <relation name="locationsByZones"> <type name="Vehicle/Vehicle"/> <type name="Vehicle/Zone/Zone"/> <type name="Location/Location"/> </relation>
+   <relation name="vehicle"> <type name="Vehicle/RemoteFob"/> <type name="Vehicle/Vehicle"/> </relation>
+</edge>
+
+<edge visible="no" attribute="yes" constraint="no">
+   <relation name="unlockEffects"> <type name="Vehicle/Vehicle"/> <type name="Vehicle/Zone/Zone"/> </relation>
+</edge>
+
+<edge visible="no" constraint="no">
+   <relation name="$theModelAsChecked_v"> <type name="Location/Location"/> <type name="Vehicle/Vehicle"/> </relation>
+</edge>
+
+<edge visible="yes" attribute="no">
+   <relation name="doorsInZone"> <type name="Vehicle/Vehicle"/> <type name="Vehicle/Zone/Zone"/> <type name="Vehicle/Door/Door"/> </relation>
+</edge>
+
+</view>
+
+</alloy>
