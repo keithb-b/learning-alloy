@@ -13,5 +13,16 @@ sig Transit extends Vehicle {
     + PassengerSide
     + DriverFront
     + PassengerFront
+
+   zones = 
+      People +
+      RearCargo +
+      OtherCargo
+
+   locationsByZones = 
+      People -> DriverFront +
+      People -> PassengerFront +
+      RearCargo -> Rear +
+      OtherCargo -> PassengerSide
 }
 ```

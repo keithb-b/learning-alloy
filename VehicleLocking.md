@@ -61,13 +61,28 @@ pred doorsChangeStateTogether{
     all v: Vehicle | 
         no v.doors.lockState :> Locked or
         no v.doors.lockState :> Unlocked
-}   
+}
+
+pred aDoorIsInAZone{
+   all d: Door |
+      one z: Zone |
+          one v: Vehicle |
+             d in v.doorsInZone[z]
+}
+   
+pred aPeopleZoneContainsTheDoorsForPeople{
+   all v: Vehicle |
+      all l: v.locations |
+          l.purpose in ForPeople => some z: v.zones | z in People and l in v.locationsByZones[z]
+}
 
 //it's a shame that we can't organize assertions this way, too. [or can we!?]
 pred validStructure{
     aVehicleHasLocationsForDoors
     aDoorBelongsToAVehicle
     aDoorIsInOneLocationOnly
+    aDoorIsInAZone 
+    aPeopleZoneContainsTheDoorsForPeople
 }
 
 pred consistentBehaviour{
@@ -121,7 +136,7 @@ pred trace{
 }
 
 //As  we should see demonstrated thus:
-//run singleVanBehaviour{trace} for exactly 1 Transit, 1 RemoteFob, 8 Door, 4 Location, 4 Time
+//run singleVanBehaviour{trace} for exactly 1 Transit, 1 RemoteFob, 4 Door, 4 Location, 4 Time
 run multipleVanBehaviour{trace} for exactly 2 Transit, 2 RemoteFob, 8 Door, 4 Location, 4 Time
 
 ```

@@ -6,9 +6,10 @@ module Vehicle
 
 open Location
 open Door
+open Zone
 ```
 ## Vehicles
-This `sig` models the structure of vehicles in general. A specific kind of vehicle should extend this and constrain `locations` appropriately.
+This `sig` models the structure of vehicles in general. A specific kind of vehicle should extend this and constrain `locations` and `locationsByZones` appropriately.
 
 ```alloy
 abstract sig Vehicle{
@@ -16,9 +17,13 @@ abstract sig Vehicle{
     ,doors: some Door
     ,doorAt: locations one -> one doors
     ,fob: disj one RemoteFob
+    ,zones: some Zone
+    ,locationsByZones: zones one -> some locations
+    ,doorsInZone: zones one -> some doors
 }{
     doors = Location.doorAt
     doors.lockState = {Locked} or doors.lockState = {Unlocked}
+    doorsInZone = locationsByZones.doorAt
 }
 ```
 ### Actions
