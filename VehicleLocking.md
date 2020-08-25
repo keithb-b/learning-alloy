@@ -76,6 +76,12 @@ pred aPeopleZoneContainsTheDoorsForPeople{
           l.purpose in ForPeople => some z: v.zones | z in People and l in v.locationsByZones[z]
 }
 
+pred aCargoZoneContainsTheDoorsForCargo{
+   all v: Vehicle |
+      all l: v.locations |
+          l.purpose in ForCargo => some z: v.zones | z in Cargo and l in v.locationsByZones[z]
+}
+
 //it's a shame that we can't organize assertions this way, too. [or can we!?]
 pred validStructure{
     aVehicleHasLocationsForDoors
@@ -83,6 +89,7 @@ pred validStructure{
     aDoorIsInOneLocationOnly
     aDoorIsInAZone 
     aPeopleZoneContainsTheDoorsForPeople
+    aCargoZoneContainsTheDoorsForCargo
 }
 
 pred consistentBehaviour{
