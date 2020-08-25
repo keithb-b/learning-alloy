@@ -57,12 +57,6 @@ pred aDoorIsInOneLocationOnly{
             one v.doorAt :> d
 }
 
-pred doorsChangeStateTogether{
-    all v: Vehicle | 
-        no v.doors.lockState :> Locked or
-        no v.doors.lockState :> Unlocked
-}
-
 pred aDoorIsInAZone{
    all d: Door |
       one z: Zone |
@@ -91,23 +85,46 @@ pred validStructure{
     aPeopleZoneContainsTheDoorsForPeople
     aCargoZoneContainsTheDoorsForCargo
 }
-
-pred consistentBehaviour{
-    doorsChangeStateTogether
-}
-
-pred vehicleModel{
-    validStructure
-    consistentBehaviour
-}
 ```
-Concrete example drawn from 2019 Ford Transit users handbook.
+### Behaviour
 
 ```alloy
 
-check theModelAsChecked{vehicleModel} for exactly 2 Transit, 2 RemoteFob, 8 Door, 4 Location expect 0 //counterexamples
+pred doorsChangeStateTogether{
+    all v: Vehicle | 
+        no v.doors.lockState :> Locked or
+        no v.doors.lockState :> Unlocked
+}
+
+pred doorsChangeStateOnlyOnFobCommands{
+    all f: RemoteFob |
+        let v = f.vehicle |
+            all d: v.doors |
+               d.unchanged until f.unlockCommanded or f.lockCommanded        
+}
+
 ```
-##Behaviour
+collecting all that together for convenience:
+
+```alloy
+pred consistentBehaviour{
+    doorsChangeStateTogether
+    doorsChangeStateOnlyOnFobCommands
+}
+
+```
+Checking structure and behaviour together for convenience:
+
+```alloy
+pred vehicleLockingModel{
+    validStructure
+    consistentBehaviour
+}
+
+check theModelAsChecked{vehicleLockingModel} for exactly 2 Transit, 2 RemoteFob, 8 Door, 4 Location, 4 Time expect 0 //counterexamples
+```
+## Demonstration
+
 ```alloy
 
 pred doorsAreLocked{
