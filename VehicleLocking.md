@@ -46,7 +46,7 @@ pred aDoorIsInALocationOnAVehicle{
     all d: Door |
         one v: Vehicle |
             one l: v.locations |
-                d = v.doorAt[l]
+                d = v.doorAtLocation[l]
 }
 
 pred aDoorIsOnOneVehicleOnly{
@@ -57,7 +57,7 @@ pred aDoorIsOnOneVehicleOnly{
 pred aDoorIsInOneLocationOnly{
     all v: Vehicle |
         all d: v.doors |
-            one v.doorAt :> d
+            one v.doorAtLocation :> d
 }
 
 pred aDoorIsInAZone{
@@ -70,13 +70,13 @@ pred aDoorIsInAZone{
 pred aPeopleZoneContainsTheDoorsForPeople{
    all v: Vehicle |
       all l: v.locations |
-          l.purpose in ForPeople => some z: v.zones | z in People and l in v.locationsByZones[z]
+          l.purpose in ForPeople => some z: v.zones | z in People and l in v.locationsByZone[z]
 }
 
 pred aCargoZoneContainsTheDoorsForCargo{
    all v: Vehicle |
       all l: v.locations |
-          l.purpose in ForCargo => some z: v.zones | z in Cargo and l in v.locationsByZones[z]
+          l.purpose in ForCargo => some z: v.zones | z in Cargo and l in v.locationsByZone[z]
 }
 ```
 collecting all that together for convenience:
@@ -93,20 +93,21 @@ pred validStructure{
 ```
 ### Behaviour
 
+Idiom: quantify a union expression with `no` to assert that the sets are disjoint
+
 ```alloy
 
 pred doorsInAZoneHaveTheSameLockState{
     all v: Vehicle |
         all z: v.zones | 
-           no v.doorsInZone[z].lockState :> Locked or
-           no v.doorsInZone[z].lockState :> Unlocked
+           no v.doorsInZone[z] & v.lockedDoors or
+           no v.doorsInZone[z] & v.unlockedDoors
 }
 
 pred doorsChangeStateOnlyOnFobCommands{
     all f: RemoteFob |
         let v = f.vehicle |
-            all d: v.doors |
-               d.unchanged until f.unlockCommanded or f.lockCommanded        
+            v.lockStatusUnchanged until f.unlockCommanded or f.lockCommanded        
 }
 
 
@@ -135,8 +136,8 @@ check theModelAsChecked{vehicleLockingModel} for exactly 2 Transit, 2 RemoteFob,
 ```alloy
 
 pred begin{
-    all d: Door |
-            d.locked
+    all v: Vehicle |
+        v.allLocked 
 }
 
 pred someValidChanges{
@@ -156,9 +157,10 @@ pred someValidChanges{
 }
 
 pred targetState{
-    eventually {
-        all d: Door | d.unlocked
-    }
+    eventually {   
+        all v: Vehicle |
+            v.allUnlocked
+        }
 }
 
 pred trace{

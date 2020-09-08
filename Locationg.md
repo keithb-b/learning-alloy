@@ -15,6 +15,10 @@ abstract sig PositionalLocation extends Location{
     ,position: one Place
 }
 
+```
+Transit has these combinations, others are possible.
+
+```alloy
 one sig DriverFront extends PositionalLocation{}{
     side = Driver
     position = Front

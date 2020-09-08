@@ -9,29 +9,37 @@ open Door
 open Zone
 ```
 ## Vehicles
-This `sig` models the structure of vehicles in general. A specific kind of vehicle should extend this and constrain:
+This `sig` models the structure of vehicles in general. A specific kind of vehicle should extend this and constrain
 
-* `locations` 
-* `zones`
-* `locationsByZones` 
-* `unlockEffects`
+* `locations` the places that a `Door` could be
+* `zones` how `Door`s are organised for locking and unlocking
+* `locationsByZone` assign each `Location` to a `Zone`
+* `unlockEffects` the collection of `Zone`s that will be effected by the next unlock command
 
 appropriately for the behaviour of that kind of vehicle.
 
 ```alloy
 abstract sig Vehicle{
+    //structural relations
     ,locations: some Location
-    ,doors: some Door
-    ,doorAt: locations one -> one doors
-    ,fob: disj one RemoteFob
     ,zones: some Zone
-    ,locationsByZones: zones one -> some locations
+    ,locationsByZone: zones one -> some locations
+    ,fob: disj one RemoteFob
+    ,doorAtLocation: locations one -> one Door
+    //derived realations
+    ,doors: some Door
     ,doorsInZone: zones one -> some doors
-    ,unlockEffects: set Zone
+    //state
+    ,var disj lockedDoors, unlockedDoors : doors
+    ,var unlockEffects: set Zone
 }{
-    doors = Location.doorAt
-    doors.lockState = {Locked} or doors.lockState = {Unlocked}
-    doorsInZone = locationsByZones.doorAt
+```
+Idiom: `Location.doorAt = doorAt[Location]` and since we join the `doorAt` relation with the whole set of `Location`s, we get the set of all the `Door`s at all the `locations` on this `Vehicle` 
+
+```alloy
+    doors = Location.doorAtLocation
+    doors = lockedDoors + unlockedDoors
+    doorsInZone = locationsByZone.doorAtLocation
 }
 
 
@@ -39,46 +47,39 @@ abstract sig Vehicle{
 ### Actions
 ```alloy
 pred Vehicle::lockCommanded{
-    all d: this.doors |
-        d.lockCommanded
+    lockedDoors' = doors
 }
 
 pred Vehicle::unlockCommanded{
-    all d: this.doors | 
-        d in this.doorsInZone[this.unlockEffects] implies 
-            d.unlockCommanded 
-        else
-            d.unchanged
+    this.doorsInZone[this.unlockEffects] in this.unlockedDoors'
 }
 
 pred Vehicle::unchanged{
-    all d: this.doors |
-        d.unchanged
+    this.lockedDoors' = this.lockedDoors
 }
 
 ```
 ### Observations
 ```alloy
 pred Vehicle::allDoorsLocked{
-    no {Unlocked} & this.doors.lockState
+    this.lockedDoors = this.doors
 } 
 
 pred Vehicle::allDoorsUnlocked{
-    no {Locked} & this.doors.lockState
+    this.unlockedDoors = this.doors
 }
 
 pred Vehicle::peopleDoorsUnlockedOnly{
-    let peopleDoors = this.doorsInZone[People] | {
-        peopleDoors.lockState' = {Unlocked}
-        all d: this.doors - peopleDoors | d.unchanged
-    }
+    this.unlockedDoors = this.doorsInZone[People] 
 }
 
+pred Vehicle::lockStatusUnchanged{
+    lockedDoors' = lockedDoors //unlockedDoors implicitly unchanged
+}
 ```
 
 ## Remote Fobs
-Vehicles are locked and unlocked using their paired wireless fob.
-
+Vehicles are locked and unlocked using their paired wireless fob. Must be in the same file, as a circular dependency.
 ```alloy
 sig RemoteFob{
     vehicle: disj one Vehicle
@@ -86,11 +87,22 @@ sig RemoteFob{
 
 ```
 ### Facts
-Slightly tricky stuff here: we say that the `fob` relation (`Vehicle -> RemoteFob`) joined with the `vehicle` relation (`RemoteFob -> Vehicle`) is a subset of the `iden`tity relation.
+Idiom: we say that the `fob` relation (`Vehicle -> RemoteFob`) joined with the `vehicle` relation (`RemoteFob -> Vehicle`) is a subset of the `iden`tity relation.
 
 ```alloy
 fact FobVehiclePairing{
     fob.vehicle in iden   
+}
+
+```
+### Observations
+```alloy
+pred Vehicle::allLocked{
+    lockedDoors = doors
+}
+
+pred Vehicle::allUnlocked{
+    unlockedDoors = doors
 }
 
 ```
