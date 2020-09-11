@@ -1,4 +1,10 @@
-abstract sig Zone{}
+open sequence[Command]
+
+abstract sig Zone{
+    ,doors: some Door
+}{
+    doors = {d: Door | one v: Vehicle | d in v.doorsByZone[this]}
+}
 
 one sig People extends Zone{}
 
@@ -90,18 +96,44 @@ pred Vehicle::lockAZone[z: Zone]{
             and not ds in this.unlockedDoors'
 }
 
-abstract sig Command {}
-sig UnlockCommanded extends Command{
+//user actions
+abstract sig Command {
     ,vehicle: one Vehicle
-    ,zone: Zone
+    ,zone: Zone}
+sig UnlockCommanded extends Command{
 }{
     vehicle.unlockAZone[zone]
 }  
+
+/* this doesn't work because both util/sequence[Command] and /util/sequniv both use primed identifiers
+sig Script{
+    ,futureCommands: seq Command
+    ,pastCommands: seq Command
+}
+
+so I hack a copy of util/sequence[elem] to not have primes and open that explicitly
+*/
+
+sig Script{
+    ,futureCommands: Seq
+    ,pastCommands: Seq
+}
+
+pred Script::step{
+    !isEmpty[this.futureCommands] =>
+            rest[this.futureCommands, this.futureCommands'] //rest is a pred
+        and add[this.pastCommands, first[this.futureCommands], this.pastCommands'] // add is a pred, first is a fun   
+}
+
 
 pred trace{
     //initally
     all v:Vehicle |
         all z: v.zones | v.zoneLocked[z]
+    always
+        one v: Vehicle |
+            one z: Zone |
+                v.unlockAZone[z]
     eventually
     all v:Vehicle | 
         all z: v.zones | not v.zoneLocked[z]
