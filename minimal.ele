@@ -1,5 +1,3 @@
-open sequence[Command]
-
 abstract sig Zone{
     ,doors: some Door
 }{
@@ -104,27 +102,6 @@ sig UnlockCommanded extends Command{
 }{
     vehicle.unlockAZone[zone]
 }  
-
-/* this doesn't work because both util/sequence[Command] and /util/sequniv both use primed identifiers
-sig Script{
-    ,futureCommands: seq Command
-    ,pastCommands: seq Command
-}
-
-so I hack a copy of util/sequence[elem] to not have primes and open that explicitly
-*/
-
-sig Script{
-    ,futureCommands: Seq
-    ,pastCommands: Seq
-}
-
-pred Script::step{
-    !isEmpty[this.futureCommands] =>
-            rest[this.futureCommands, this.futureCommands'] //rest is a pred
-        and add[this.pastCommands, first[this.futureCommands], this.pastCommands'] // add is a pred, first is a fun   
-}
-
 
 pred trace{
     //initally
