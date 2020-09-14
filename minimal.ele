@@ -1,78 +1,64 @@
-abstract sig Zone{
-    ,doors: some Door
-}{
-    doors = {d: Door | one v: Vehicle | d in v.doorsByZone[this]}
-}
-
-one sig People extends Zone{}
-
-abstract sig Cargo extends Zone{}
-
-one sig RearCargo extends Cargo{}
-
-one sig OtherCargo extends Cargo{}
-
 abstract sig Location{}
 
-one sig DriverFront extends Location{}
-
-one sig PassengerFront extends Location{}
-
-one sig PassengerSide extends Location{}
-
-one sig Rear extends Location{}
-
-sig Door{}
+abstract sig Zone{
+    locations: disj some Location
+}
 
 abstract sig Vehicle{
-    //structural relations
-    ,zones: some Zone
+  //structural relations
     ,locations: some Location
-    ,locationsByZone: zones one -> some locations
-    ,doorAtLocation: locations one -> one Door
-    //derived relations
-    ,doors: some Door
-    ,doorsByZone: zones one -> some doors
-    //state
-    ,var lockedDoors: set Door
-    ,var unlockedDoors: set Door
+
+    ,zones: some Zone
+    ,locationsInZone: zones one -> some locations
+
+  //state
+    ,var locked:   disj set zones
+    ,var unlocked: disj set zones
 }{
-     doors = Zone.locationsByZone.doorAtLocation
-     doors = lockedDoors + unlockedDoors and no lockedDoors & unlockedDoors //cant't do part on vars, it seems
-     doorsByZone = locationsByZone.doorAtLocation
+  //facts about derived relations
+    all z: zones | z.locations = locationsInZone[z]
+  //facts about state
+    zones = locked + unlocked
 }
+
+one sig DriverFront extends Location{}
+one sig PassengerFront extends Location{}
+one sig PassengerSide extends Location{}
+one sig Rear extends Location{}
+
+one sig People extends Zone{}
+abstract sig Cargo extends Zone{}
+one sig RearCargo extends Cargo{}
+one sig OtherCargo extends Cargo{}
 
 sig Transit extends Vehicle {
 }{
    zones = 
-      People +
-      RearCargo +
-      OtherCargo
+         People 
+       + RearCargo 
+       + OtherCargo
 
    locations = 
-      Rear
-    + PassengerSide
-    + DriverFront
-    + PassengerFront
+         Rear
+       + PassengerSide
+       + DriverFront
+       + PassengerFront
 
-   locationsByZone = 
-      People -> DriverFront
-    + People -> PassengerFront
-    + RearCargo -> Rear
-    + OtherCargo -> PassengerSide
+   locationsInZone = 
+         People     -> DriverFront
+       + People     -> PassengerFront
+       + RearCargo  -> Rear
+       + OtherCargo -> PassengerSide
 }
 
 //observations
 pred Vehicle::zoneLocked[z: Zone]{
-    let ds = this.doorsByZone[z] |
-            ds in this.lockedDoors and 
-        not ds in this.unlockedDoors
+    z in this.locked
 }
 
 pred Vehicle::zoneUnchanged[z: Zone]{
-    let ds = this.doorsByZone[z] |
-            ds in this.lockedDoors   <=> ds in this.lockedDoors'
-        and ds in this.unlockedDoors <=> ds in this.unlockedDoors'
+    {z} & this.locked   = {z} & this.locked'
+    {z} & this.unlocked = {z} & this.unlocked'
 }
 
 pred Vehicle::zonesOtherThanUnchanged[z: Zone]{
@@ -81,39 +67,56 @@ pred Vehicle::zonesOtherThanUnchanged[z: Zone]{
 
 //actions
 pred Vehicle::unlockAZone[z: Zone]{
-        this.zonesOtherThanUnchanged[z]
-    and let ds = this.doorsByZone[z] |
-                    ds in this.unlockedDoors'
-            and not ds in this.lockedDoors'
+    this.unlocked' = this.unlocked + {z}
+    this.locked'   = this.locked   - {z}
+    this.zonesOtherThanUnchanged[z]
 }
 
 pred Vehicle::lockAZone[z: Zone]{
-        this.zonesOtherThanUnchanged[z]
-    and let ds = this.doorsByZone[z] |
-                    ds in this.lockedDoors'
-            and not ds in this.unlockedDoors'
+    this.locked'   = this.locked   + {z}
+    this.unlocked' = this.unlocked - {z}
+    this.zonesOtherThanUnchanged[z]
 }
 
-//user actions
-abstract sig Command {
-    ,vehicle: one Vehicle
-    ,zone: Zone}
-sig UnlockCommanded extends Command{
-}{
-    vehicle.unlockAZone[zone]
-}  
+pred skip{
+    all v: Vehicle |
+        all z: v.zones |
+            v.zoneUnchanged[z]
+}
 
+//event reification
+
+enum Command {Unlock, Lock, Skip}
+fun _unlock: Command -> Vehicle -> Zone {
+    Unlock -> {v: Vehicle, z: Zone| v.unlockAZone[z]}
+}
+
+fun _lock: Command -> Vehicle -> Zone {
+    Lock -> {v: Vehicle, z: Zone| v.lockAZone[z]}
+}
+
+fun _skip: Command {
+    {c : Skip | skip}
+}
+
+fun commands: set Command {
+    (_unlock + _lock).Zone.Vehicle + _skip
+}
+    
+//demonstration    
 pred trace{
-    //initally
+    //initally -- it would be nice to have a (yes, redundant!) keyword for this
     all v:Vehicle |
         all z: v.zones | v.zoneLocked[z]
     always
-        one v: Vehicle |
-            one z: Zone |
-                v.unlockAZone[z]
+           (skip
+        or one v: Vehicle |
+               one z: Zone |
+                      v.unlockAZone[z]
+                   or v.lockAZone[z])
     eventually
-    all v:Vehicle | 
-        all z: v.zones | not v.zoneLocked[z]
+        all v:Vehicle | 
+            all z: v.zones | not v.zoneLocked[z]
 }
 
-run {trace} for exactly 1 Transit, 4 Door, 4 Command
+run {trace} for exactly 1 Transit, 6 Time
