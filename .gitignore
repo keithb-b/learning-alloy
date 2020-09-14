@@ -2,3 +2,7 @@
 door_state_MWE.ele
 
 door_state_MWI.ele
+
+*.patch
+
+*.tar
