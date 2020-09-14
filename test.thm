@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+<alloy>
+
+<view>
+
+<defaultnode/>
+
+<defaultedge/>
+
+<node>
+   <type name="Cargo"/>
+   <type name="DriverFront"/>
+   <type name="Int"/>
+   <type name="Lock"/>
+   <type name="OtherCargo"/>
+   <type name="PassengerFront"/>
+   <type name="PassengerSide"/>
+   <type name="People"/>
+   <type name="Rear"/>
+   <type name="RearCargo"/>
+   <type name="Skip"/>
+   <type name="String"/>
+   <type name="Transit"/>
+   <type name="univ"/>
+   <type name="Unlock"/>
+   <type name="ordering/Ord"/>
+   <type name="seq/Int"/>
+   <set name="$_skip" type="Command"/>
+</node>
+
+<node shape="Dbl Octagon">
+   <type name="Vehicle"/>
+</node>
+
+<node style="Dotted" shape="Ellipse" color="Blue">
+   <type name="Zone"/>
+</node>
+
+<node style="Solid" shape="Octagon" color="Yellow">
+   <type name="Location"/>
+</node>
+
+<node visible="yes">
+   <type name="Command"/>
+</node>
+
+<node visible="yes" showlabel="no">
+   <set name="$commands" type="Command"/>
+</node>
+
+<edge color="Blue" style="Bold" visible="no">
+   <relation name="zones"> <type name="Vehicle"/> <type name="Zone"/> </relation>
+</edge>
+
+<edge visible="no">
+   <relation name="locations"> <type name="Vehicle"/> <type name="Location"/> </relation>
+   <relation name="locationsInZone"> <type name="Vehicle"/> <type name="Zone"/> <type name="Location"/> </relation>
+</edge>
+
+<edge visible="no" attribute="yes">
+   <relation name="$_lock"> <type name="Command"/> <type name="Vehicle"/> <type name="Zone"/> </relation>
+   <relation name="$_unlock"> <type name="Command"/> <type name="Vehicle"/> <type name="Zone"/> </relation>
+</edge>
+
+</view>
+
+</alloy>
