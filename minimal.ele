@@ -12,8 +12,7 @@ abstract sig Vehicle{
     ,locationsInZone: zones one -> some locations
 
   //state
-    ,var locked:   disj set zones
-    ,var unlocked: disj set zones
+    ,var disj locked, unlocked: set zones
 }{
   //facts about derived relations
     all z: zones | z.locations = locationsInZone[z]
@@ -84,7 +83,11 @@ pred skip{
             v.zoneUnchanged[z]
 }
 
-//event reification
+//
+assert aZoneIsLockedOrUnlocked{
+   all v: Vehicle |
+      no v.locked & v.unlocked
+}
 
 enum Command {Unlock, Lock, Skip}
 fun _unlock: Command -> Vehicle -> Zone {
