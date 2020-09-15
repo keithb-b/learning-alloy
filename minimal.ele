@@ -89,21 +89,22 @@ assert aZoneIsLockedOrUnlocked{
       no v.locked & v.unlocked
 }
 
+//event reification
 enum Command {Unlock, Lock, Skip}
-fun _unlock: Command -> Vehicle -> Zone {
-    Unlock -> {v: Vehicle, z: Zone| v.unlockAZone[z]}
+fun unlock: Command -> Vehicle -> Zone {
+    Unlock -> {v: Vehicle, z: Zone| v.unlock[z]}
 }
 
-fun _lock: Command -> Vehicle -> Zone {
-    Lock -> {v: Vehicle, z: Zone| v.lockAZone[z]}
+fun lock: Command -> Vehicle -> Zone {
+    Lock -> {v: Vehicle, z: Zone| v.lock[z]}
 }
 
-fun _skip: Command {
+fun skip: Command {
     {c : Skip | skip}
 }
 
 fun commands: set Command {
-    (_unlock + _lock).Zone.Vehicle + _skip
+    (unlock + lock).Zone.Vehicle + skip
 }
     
 //demonstration    
@@ -115,8 +116,8 @@ pred trace{
            (skip
         or one v: Vehicle |
                one z: Zone |
-                      v.unlockAZone[z]
-                   or v.lockAZone[z])
+                      v.unlock[z]
+                   or v.lock[z])
     eventually
         all v:Vehicle | 
             all z: v.zones | not v.zoneLocked[z]
