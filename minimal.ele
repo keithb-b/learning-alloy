@@ -56,8 +56,8 @@ pred Vehicle::zoneLocked[z: Zone]{
 }
 
 pred Vehicle::zoneUnchanged[z: Zone]{
-    {z} & this.locked   = {z} & this.locked'
-    {z} & this.unlocked = {z} & this.unlocked'
+    z & this.locked   = z & this.locked'
+    z & this.unlocked = z & this.unlocked'
 }
 
 pred Vehicle::zonesOtherThanUnchanged[z: Zone]{
@@ -65,15 +65,15 @@ pred Vehicle::zonesOtherThanUnchanged[z: Zone]{
 }
 
 //actions
-pred Vehicle::unlockAZone[z: Zone]{
-    this.unlocked' = this.unlocked + {z}
-    this.locked'   = this.locked   - {z}
+pred Vehicle::unlock[z: Zone]{
+    this.unlocked' = this.unlocked + z
+    this.locked'   = this.locked   - z
     this.zonesOtherThanUnchanged[z]
 }
 
-pred Vehicle::lockAZone[z: Zone]{
-    this.locked'   = this.locked   + {z}
-    this.unlocked' = this.unlocked - {z}
+pred Vehicle::lock[z: Zone]{
+    this.locked'   = this.locked   + z
+    this.unlocked' = this.unlocked - z
     this.zonesOtherThanUnchanged[z]
 }
 
