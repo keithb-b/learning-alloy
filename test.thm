@@ -31,6 +31,10 @@
    <type name="Vehicle"/>
 </node>
 
+<node shape="Inv House" color="Gray">
+   <set name="$skip" type="Command"/>
+</node>
+
 <node style="Dotted" shape="Ellipse" color="Blue">
    <type name="Zone"/>
 </node>
@@ -41,10 +45,6 @@
 
 <node visible="no" shape="House" color="Blue">
    <type name="Command"/>
-</node>
-
-<node visible="no" showlabel="no" color="Gray">
-   <set name="$_skip" type="Command"/>
 </node>
 
 <node visible="yes" showlabel="no">
@@ -59,16 +59,16 @@
    <relation name="unlocked"> <type name="Vehicle"/> <type name="Zone"/> </relation>
 </edge>
 
-<edge color="Green" visible="no" attribute="yes">
-   <relation name="$_unlock"> <type name="Command"/> <type name="Vehicle"/> <type name="Zone"/> </relation>
+<edge color="Green" style="Bold">
+   <relation name="$unlock"> <type name="Command"/> <type name="Vehicle"/> <type name="Zone"/> </relation>
 </edge>
 
 <edge color="Red">
    <relation name="locked"> <type name="Vehicle"/> <type name="Zone"/> </relation>
 </edge>
 
-<edge color="Red" visible="no" attribute="yes">
-   <relation name="$_lock"> <type name="Command"/> <type name="Vehicle"/> <type name="Zone"/> </relation>
+<edge color="Red" style="Bold">
+   <relation name="$lock"> <type name="Command"/> <type name="Vehicle"/> <type name="Zone"/> </relation>
 </edge>
 
 <edge visible="no">
