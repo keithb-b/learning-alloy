@@ -108,8 +108,8 @@ fun commands: set Command {
 }
     
 //demonstration    
-pred trace{
-    //initally -- it would be nice to have a (yes, redundant!) keyword for this
+fact trace{
+    //initally
     all v:Vehicle |
         all z: v.zones | v.zoneLocked[z]
     always
@@ -118,9 +118,14 @@ pred trace{
                one z: Zone |
                       v.unlock[z]
                    or v.lock[z])
+
+}
+
+pred allUnlocked{
     eventually
         all v:Vehicle | 
             all z: v.zones | not v.zoneLocked[z]
 }
 
-run {trace} for exactly 1 Transit, 6 Time
+run {allUnlocked} for exactly 1 Transit, 6 Time
+
