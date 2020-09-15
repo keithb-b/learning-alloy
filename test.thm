@@ -25,7 +25,6 @@
    <type name="Unlock"/>
    <type name="ordering/Ord"/>
    <type name="seq/Int"/>
-   <set name="$_skip" type="Command"/>
 </node>
 
 <node shape="Dbl Octagon">
@@ -40,8 +39,12 @@
    <type name="Location"/>
 </node>
 
-<node visible="yes">
+<node visible="no" shape="House" color="Blue">
    <type name="Command"/>
+</node>
+
+<node visible="no" showlabel="no" color="Gray">
+   <set name="$_skip" type="Command"/>
 </node>
 
 <node visible="yes" showlabel="no">
@@ -52,14 +55,25 @@
    <relation name="zones"> <type name="Vehicle"/> <type name="Zone"/> </relation>
 </edge>
 
+<edge color="Green">
+   <relation name="unlocked"> <type name="Vehicle"/> <type name="Zone"/> </relation>
+</edge>
+
+<edge color="Green" visible="no" attribute="yes">
+   <relation name="$_unlock"> <type name="Command"/> <type name="Vehicle"/> <type name="Zone"/> </relation>
+</edge>
+
+<edge color="Red">
+   <relation name="locked"> <type name="Vehicle"/> <type name="Zone"/> </relation>
+</edge>
+
+<edge color="Red" visible="no" attribute="yes">
+   <relation name="$_lock"> <type name="Command"/> <type name="Vehicle"/> <type name="Zone"/> </relation>
+</edge>
+
 <edge visible="no">
    <relation name="locations"> <type name="Vehicle"/> <type name="Location"/> </relation>
    <relation name="locationsInZone"> <type name="Vehicle"/> <type name="Zone"/> <type name="Location"/> </relation>
-</edge>
-
-<edge visible="no" attribute="yes">
-   <relation name="$_lock"> <type name="Command"/> <type name="Vehicle"/> <type name="Zone"/> </relation>
-   <relation name="$_unlock"> <type name="Command"/> <type name="Vehicle"/> <type name="Zone"/> </relation>
 </edge>
 
 </view>
