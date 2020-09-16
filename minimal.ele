@@ -90,13 +90,13 @@ assert aZoneIsLockedOrUnlocked{
 }
 
 //event reification
-enum Command {Unlock, Lock, Skip}
-fun unlock: Command -> Vehicle -> Zone {
-    Unlock -> {v: Vehicle, z: Zone| v.unlock[z]}
-}
-
-fun lock: Command -> Vehicle -> Zone {
-    Lock -> {v: Vehicle, z: Zone| v.lock[z]}
+abstract sig Command {}
+one sig Unlock extends Command{}
+one sig Lock extends Command{}
+one sig Skip extends Command{}
+fun on: Command -> Vehicle -> Zone {
+      Unlock -> {v: Vehicle, z: Zone| v.unlock[z]}
+    + Lock   -> {v: Vehicle, z: Zone| v.lock[z]}
 }
 
 fun skip: Command {
@@ -104,7 +104,7 @@ fun skip: Command {
 }
 
 fun commands: set Command {
-    (unlock + lock).Zone.Vehicle + skip
+    on.Zone.Vehicle + skip
 }
     
 //demonstration    

@@ -11,28 +11,20 @@
    <type name="Cargo"/>
    <type name="DriverFront"/>
    <type name="Int"/>
-   <type name="Lock"/>
    <type name="OtherCargo"/>
    <type name="PassengerFront"/>
    <type name="PassengerSide"/>
    <type name="People"/>
    <type name="Rear"/>
    <type name="RearCargo"/>
-   <type name="Skip"/>
    <type name="String"/>
    <type name="Transit"/>
    <type name="univ"/>
-   <type name="Unlock"/>
-   <type name="ordering/Ord"/>
    <type name="seq/Int"/>
 </node>
 
 <node shape="Dbl Octagon">
    <type name="Vehicle"/>
-</node>
-
-<node shape="Inv House" color="Gray">
-   <set name="$skip" type="Command"/>
 </node>
 
 <node style="Dotted" shape="Ellipse" color="Blue">
@@ -43,12 +35,28 @@
    <type name="Location"/>
 </node>
 
-<node visible="no" shape="House" color="Blue">
+<node visible="yes" color="Gray">
+   <type name="Skip"/>
+</node>
+
+<node visible="yes" color="Green">
+   <type name="Unlock"/>
+</node>
+
+<node visible="yes" color="Red">
+   <type name="Lock"/>
+</node>
+
+<node visible="yes" shape="House" color="Blue">
    <type name="Command"/>
 </node>
 
-<node visible="yes" showlabel="no">
+<node visible="yes" showlabel="no" shape="Inv House">
    <set name="$commands" type="Command"/>
+</node>
+
+<node visible="yes" showlabel="no" shape="Inv House" color="Gray">
+   <set name="$skip" type="Command"/>
 </node>
 
 <edge color="Blue" style="Bold" visible="no">
@@ -59,7 +67,7 @@
    <relation name="unlocked"> <type name="Vehicle"/> <type name="Zone"/> </relation>
 </edge>
 
-<edge color="Green" style="Bold">
+<edge color="Green" style="Bold" visible="yes">
    <relation name="$unlock"> <type name="Command"/> <type name="Vehicle"/> <type name="Zone"/> </relation>
 </edge>
 
@@ -67,7 +75,7 @@
    <relation name="locked"> <type name="Vehicle"/> <type name="Zone"/> </relation>
 </edge>
 
-<edge color="Red" style="Bold">
+<edge color="Red" style="Bold" visible="yes">
    <relation name="$lock"> <type name="Command"/> <type name="Vehicle"/> <type name="Zone"/> </relation>
 </edge>
 
