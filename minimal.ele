@@ -64,6 +64,11 @@ pred Vehicle::zonesOtherThanUnchanged[z: Zone]{
     all z: this.zones - z | this.zoneUnchanged[z]
 }
 
+pred Vehicle::unchanged{
+   this.locked'   = this.locked
+   this.unlocked' = this.unlocked
+}
+
 //actions
 pred Vehicle::unlock[z: Zone]{
     this.unlocked' = this.unlocked + z
@@ -79,11 +84,10 @@ pred Vehicle::lock[z: Zone]{
 
 pred skip{
     all v: Vehicle |
-        all z: v.zones |
-            v.zoneUnchanged[z]
+        v.unchanged
 }
 
-//
+//invariant frame conditions
 assert aZoneIsLockedOrUnlocked{
    all v: Vehicle |
       no v.locked & v.unlocked
@@ -113,11 +117,12 @@ fact trace{
     all v:Vehicle |
         all z: v.zones | v.zoneLocked[z]
     always
-           (skip
-        or one v: Vehicle |
-               one z: Zone |
-                      v.unlock[z]
-                   or v.lock[z])
+        (   skip
+         or one v: Vehicle |
+                 one z: Zone |
+                       v.unlock[z]
+                    or v.lock[z]
+        )
 
 }
 
@@ -127,5 +132,5 @@ pred allUnlocked{
             all z: v.zones | not v.zoneLocked[z]
 }
 
-run {allUnlocked} for exactly 1 Transit, 6 Time
+run {allUnlocked} for exactly 2 Transit, 6 Command, 6 Time
 
