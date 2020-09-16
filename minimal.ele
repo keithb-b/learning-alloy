@@ -64,6 +64,10 @@ pred Vehicle::zonesOtherThanUnchanged[z: Zone]{
     all z: this.zones - z | this.zoneUnchanged[z]
 }
 
+pred Vehicle::otherVehiclesUnchanged{
+   all v: Vehicle - this | v.unchanged
+}
+
 pred Vehicle::unchanged{
    this.locked'   = this.locked
    this.unlocked' = this.unlocked
@@ -74,12 +78,15 @@ pred Vehicle::unlock[z: Zone]{
     this.unlocked' = this.unlocked + z
     this.locked'   = this.locked   - z
     this.zonesOtherThanUnchanged[z]
+    this.otherVehiclesUnchanged
+    
 }
 
 pred Vehicle::lock[z: Zone]{
     this.locked'   = this.locked   + z
     this.unlocked' = this.unlocked - z
     this.zonesOtherThanUnchanged[z]
+    this.otherVehiclesUnchanged
 }
 
 pred skip{
@@ -95,9 +102,8 @@ assert aZoneIsLockedOrUnlocked{
 
 //event reification
 abstract sig Command {}
-one sig Unlock extends Command{}
-one sig Lock extends Command{}
-one sig Skip extends Command{}
+one sig Unlock, Lock, Skip extends Command{}
+
 fun on: Command -> Vehicle -> Zone {
       Unlock -> {v: Vehicle, z: Zone| v.unlock[z]}
     + Lock   -> {v: Vehicle, z: Zone| v.lock[z]}
@@ -132,5 +138,5 @@ pred allUnlocked{
             all z: v.zones | not v.zoneLocked[z]
 }
 
-run {allUnlocked} for exactly 2 Transit, 6 Command, 6 Time
+run {allUnlocked} for exactly 2 Transit, 8 Command, 8 Time
 
