@@ -1,3 +1,17 @@
+/*
+From https://www.fordservicecontent.com/Ford_Content/vdirsnet/OwnerManual/Home/Content?bookCode=O192169&countryCode=USA&languageCode=en&marketCode=US&viewTech=IE&chapterTitleSelected=G2002375&subTitleSelected=G2048159&topicHRef=G2048160&div=f&variantid=7956&vFilteringEnabled=False&userMarket=GBR
+Remote Control
+Unlocking the Doors
+Press the [open padlock/unlock] button to unlock the front doors. One long flash of the direction indicators confirms that your vehicle has unlocked.
+Unlocking the Cargo Doors
+Press the [van and open padlock] button on the remote control once to unlock the rear cargo doors. 
+Press the [van and open padlock] button again within two seconds to unlock all cargo doors.
+Press the [closed padlock] button twice within three seconds. [to double lock]
+When you press the unlock button, either all the doors are unlocked or only the driver or driver and passenger doors are unlocked.
+You can reprogram the unlocking function so that all doors are unlocked.
+ Press and hold the unlock and lock buttons on the remote control simultaneously for at least four seconds with the ignition off.
+*/:
+
 abstract sig Location{}
 
 abstract sig Zone{
@@ -129,7 +143,6 @@ fact trace{
                        v.unlock[z]
                     or v.lock[z]
         )
-
 }
 
 pred allUnlocked{
