@@ -25,8 +25,6 @@ abstract sig Vehicle{
     ,zones: some Zone
     ,locationsInZone: zones one -> some locations
 
-    ,fob: disj one Fob
-
   //state
     ,var disj locked, unlocked: set zones
 }{
@@ -64,8 +62,6 @@ sig Transit extends Vehicle {
        + People     -> PassengerFront
        + RearCargo  -> Rear
        + OtherCargo -> PassengerSide
-
-    fob in TransitFob
 }
 
 //observations
@@ -112,47 +108,46 @@ pred skip{
         v.unchanged
 }
 
-abstract sig Button{}
-one sig OpenPadlock, VanAndOpenPadlock, ClosedPadlock extends Button{}
-
-abstract sig Fob{
-    ,vehicle: disj one Vehicle
-    ,buttons: some Button
-}
-
-sig TransitFob extends Fob{}{
-    vehicle in Transit
-
-    buttons =
-            OpenPadlock
-          + VanAndOpenPadlock
-          + ClosedPadlock
-}
-
 //invariant frame conditions
 assert aZoneIsLockedOrUnlocked{
    all v: Vehicle |
       no v.locked & v.unlocked
 }
 
-//event reification
-//abstract sig Command {}
-//one sig Unlock, Lock, Skip extends Command{}
-enum VehicleAction{Unlock, CargoUnlock, Lock, Skip}
-fun on: VehicleAction -> Vehicle -> Zone {
-      Unlock -> {v: Vehicle, z: Zone| v.unlock[z]}
-    + CargoUnlock -> {v:Vehicle, z:Zone| v.unlock[z]}
-    + Lock   -> {v: Vehicle, z: Zone| v.lock[z]}
+abstract sig Button{}
+one sig OpenPadlock, VanAndOpenPadlock, ClosedPadlock extends Button{}
+
+abstract sig Fob{
+  //structural relations
+    ,vehicle: disj one Vehicle
+    ,buttons: some Button
+/*
+  //reified events for user actions
+    ,actions: disj some FobAction
+    ,actionForButton: buttons one -> one actions*/
 }
 
-fun skip: VehicleAction {
-    {c : Skip | skip}
+fact fobsAndVehiclesArePaired{
+    vehicle.fob in iden
 }
 
-fun commands: set VehicleAction {
-    on.Zone.Vehicle + skip
+sig TransitFob extends Fob{}{
+  //structure
+    vehicle in Transit
+
+  //vehicle specifics
+    buttons =
+            OpenPadlock
+          + VanAndOpenPadlock
+          + ClosedPadlock
 }
-    
+
+pred Fob::userPressed[b: Button]{
+         b = OpenPadlock implies this.vehicle.unlock[People]
+    else b = VanAndOpenPadlock implies this.vehicle.unlock[RearCargo]
+    else b = ClosedPadlock implies this.vehicle.lock[People] and this.vehicle.lock[RearCargo] and this.vehicle.lock[OtherCargo]
+}
+
 //demonstration    
 fact trace{
     //initally
@@ -170,8 +165,8 @@ fact trace{
 pred allUnlocked{
     eventually
         all v:Vehicle | 
-            all z: People| not v.zoneLocked[z]
+            all z: v.zones | not v.zoneLocked[z]
 }
 
-run {allUnlocked} for exactly 2 Transit, 2 Fob, 8 Time
+run {allUnlocked} for exactly 2 Transit, 8 Time
 
