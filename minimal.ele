@@ -113,7 +113,7 @@ pred skip{
 }
 
 //invariant frame conditions
-assert aZoneIsLockedOrUnlocked{
+fact aZoneIsLockedOrUnlocked{
    all v: Vehicle |
       no v.locked & v.unlocked
 }
@@ -147,9 +147,13 @@ sig TransitFob extends Fob{}{
 }
 
 pred Fob::userPressed[b: Button]{
-         b = OpenPadlock implies this.vehicle.unlock[People]
+         b = OpenPadlock       implies this.vehicle.unlock[People]
     else b = VanAndOpenPadlock implies this.vehicle.unlock[RearCargo]
-    else b = ClosedPadlock implies this.vehicle.lock[People] and this.vehicle.lock[RearCargo] and this.vehicle.lock[OtherCargo]
+    else b = ClosedPadlock     implies {
+                 this.vehicle.lock[People]
+                 this.vehicle.lock[RearCargo]   
+                 this.vehicle.lock[OtherCargo]
+             }
 }
 
 //demonstration    
