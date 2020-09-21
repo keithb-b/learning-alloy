@@ -11,7 +11,7 @@ When you press the unlock button, either all the doors are unlocked or only the 
 You can reprogram the unlocking function so that all doors are unlocked.
  Press and hold the unlock and lock buttons on the remote control simultaneously for at least four seconds with the ignition off.
 */
-
+open util/relation
 abstract sig Location{}
 
 abstract sig Zone{
@@ -30,21 +30,22 @@ abstract sig Vehicle{
   //state
     ,var disj locked, unlocked: set zones
 }{
-  //facts about derived relations
+         total[locationsInZone, zones]     //no unneeded zones
+    surjective[locationsInZone, locations] //no dangling locations
+  
+  //zones know their locations
+  //mainly for the benefit of visualizations
     all z: zones | z.locations = locationsInZone[z]
+    
   //facts about state
     zones = locked + unlocked
 }
 
-one sig DriverFront extends Location{}
-one sig PassengerFront extends Location{}
-one sig PassengerSide extends Location{}
-one sig Rear extends Location{}
+one sig DriverFront, PassengerFront, PassengerSide, Rear extends Location{}
 
 one sig People extends Zone{}
 abstract sig Cargo extends Zone{}
-one sig RearCargo extends Cargo{}
-one sig OtherCargo extends Cargo{}
+one sig RearCargo, OtherCargo extends Cargo{}
 
 sig Transit extends Vehicle {
 }{
@@ -146,6 +147,7 @@ sig TransitFob extends Fob{}{
           + ClosedPadlock
 }
 
+//actions
 pred Fob::userPressed[b: Button]{
          b = OpenPadlock       implies this.vehicle.unlock[People]
     else b = VanAndOpenPadlock implies this.vehicle.unlock[RearCargo]
