@@ -5,13 +5,14 @@ Unlocking the Doors
 Press the [open padlock/unlock] button to unlock the front doors. One long flash of the direction indicators confirms that your vehicle has unlocked.
 Unlocking the Cargo Doors
 Press the [van and open padlock] button on the remote control once to unlock the rear cargo doors. 
-Press the [van and open padlock] button again within two seconds to unlock all cargo doors.
+Press the [van and open padlock] button again within two seconds [we'll say, on one of the next two ticks] to unlock all cargo doors.
 Press the [closed padlock] button twice within three seconds. [to double lock]
 When you press the unlock button, either all the doors are unlocked or only the driver or driver and passenger doors are unlocked.
 You can reprogram the unlocking function so that all doors are unlocked.
  Press and hold the unlock and lock buttons on the remote control simultaneously for at least four seconds with the ignition off.
 */
 open util/relation
+
 abstract sig Location{}
 
 abstract sig Zone{
@@ -39,15 +40,19 @@ abstract sig Vehicle{
     
   //facts about state
     zones = locked + unlocked
+
 }
 
+//Transit
+//locations
 one sig DriverFront, PassengerFront, PassengerSide, Rear extends Location{}
-
+//zones
 one sig People extends Zone{}
 abstract sig Cargo extends Zone{}
 one sig RearCargo, OtherCargo extends Cargo{}
 
 sig Transit extends Vehicle {
+    ,var cargoUnlockCountdown: Int
 }{
    zones = 
          People 
@@ -84,33 +89,62 @@ pred Vehicle::zonesOtherThanUnchanged[z: Zone]{
 }
 
 pred Vehicle::otherVehiclesUnchanged{
-   all v: Vehicle - this | v.unchanged
+   all v: Vehicle - this | v.lockStateUnchanged
 }
 
-pred Vehicle::unchanged{
-   this.locked'   = this.locked
-   this.unlocked' = this.unlocked
-}
 
 //actions
 pred Vehicle::unlock[z: Zone]{
-    this.unlocked' = this.unlocked + z
-    this.locked'   = this.locked   - z
-    this.zonesOtherThanUnchanged[z]
+    this.cargoUnlockCountdownUpdated[z]
+    let az = this.affectedZoneFor[z] | {
+        this.unlocked' = this.unlocked + az
+        this.locked'   = this.locked   - az
+        this.zonesOtherThanUnchanged[az]
+    }
+
     this.otherVehiclesUnchanged
-    
 }
 
 pred Vehicle::lock[z: Zone]{
     this.locked'   = this.locked   + z
     this.unlocked' = this.unlocked - z
+
     this.zonesOtherThanUnchanged[z]
     this.otherVehiclesUnchanged
 }
 
+pred Vehicle::lockStateUnchanged{
+   this.locked'   = this.locked
+   this.unlocked' = this.unlocked
+}
+
 pred skip{
     all v: Vehicle |
-        v.unchanged
+        v.lockStateUnchanged
+}
+
+fun Vehicle::affectedZoneFor[z: Zone]: Zone{
+    z.(  
+         People -> People
+       + Cargo  -> this.currentCargoZones
+      )
+}
+
+//state machine
+fun Transit::currentCargoZones[]: some Zone{
+         zero[this.cargoUnlockCountdown] implies RearCargo
+    else RearCargo + OtherCargo
+}
+
+pred Transit::cargoUnlockCountdownUpdated[z:Zone]{
+         z in People implies this.cargoUnlockCountdown' = 0
+    else                     this.cargoUnlockCountdown' = 3
+    all t: Transit - this | t.cargoUnlockCountdown' = t.cargoUnlockCountdown
+}
+
+pred tick{
+   all t: Transit |
+       t.cargoUnlockCountdown' = larger[0, minus[t.cargoUnlockCountdown, 1]]
 }
 
 //invariant frame conditions
@@ -150,25 +184,28 @@ sig TransitFob extends Fob{}{
 //actions
 pred Fob::userPressed[b: Button]{
          b = OpenPadlock       implies this.vehicle.unlock[People]
-    else b = VanAndOpenPadlock implies this.vehicle.unlock[RearCargo]
+    else b = VanAndOpenPadlock implies this.vehicle.unlock[Cargo]
     else b = ClosedPadlock     implies {
                  this.vehicle.lock[People]
-                 this.vehicle.lock[RearCargo]   
-                 this.vehicle.lock[OtherCargo]
+                 this.vehicle.lock[Cargo] //does this in fact lock all cargo?
              }
 }
 
 //demonstration    
 fact trace{
     //initally
-    all v:Vehicle |
-        all z: v.zones | v.zoneLocked[z]
-    always
-        (   skip
-         or one f: Fob |
-                one b: f.buttons |
-                   f.userPressed[b]
-        )
+    all v:Vehicle | {
+        v.cargoUnlockCountdown = 3
+        all z: v.zones |
+            v.zoneLocked[z]
+    }
+    always (    
+             tick
+         and    skip
+             or one f: Fob |
+                    one b: f.buttons |
+                        f.userPressed[b]
+    )
 }
 
 pred unlockedAsGiven{
