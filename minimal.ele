@@ -195,7 +195,7 @@ pred Fob::userPressed[b: Button]{
 fact trace{
     //initally
     all v:Vehicle | {
-        v.cargoUnlockCountdown = 3
+        v.cargoUnlockCountdown = 0
         all z: v.zones |
             v.zoneLocked[z]
     }
@@ -211,7 +211,7 @@ fact trace{
 pred unlockedAsGiven{
     eventually
         all v:Vehicle | 
-            all z: RearCargo + People| not v.zoneLocked[z]
+            all z: v.zones | not v.zoneLocked[z]
 }
 
 run {unlockedAsGiven} for exactly 2 Transit, 2 Fob, 16 Time
