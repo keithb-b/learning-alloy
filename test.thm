@@ -9,7 +9,6 @@
 
 <node>
    <type name="Cargo"/>
-   <type name="CargoUnlock"/>
    <type name="ClosedPadlock"/>
    <type name="DriverFront"/>
    <type name="Int"/>
@@ -26,11 +25,6 @@
    <type name="univ"/>
    <type name="VanAndOpenPadlock"/>
    <type name="seq/Int"/>
-   <set name="$skip" type="VehicleAction"/>
-</node>
-
-<node color="Green">
-   <type name="UnlockAction"/>
 </node>
 
 <node shape="Dbl Octagon">
@@ -38,20 +32,8 @@
    <type name="Vehicle"/>
 </node>
 
-<node shape="House">
-   <type name="VehicleAction"/>
-</node>
-
-<node shape="Inv House" color="Red">
-   <type name="LockAction"/>
-</node>
-
 <node shape="Octagon">
    <type name="Button"/>
-</node>
-
-<node showlabel="no">
-   <set name="$commands" type="VehicleAction"/>
 </node>
 
 <node style="Dotted" shape="Ellipse" color="Blue">
@@ -62,19 +44,11 @@
    <type name="Location"/>
 </node>
 
-<node visible="yes" color="Green">
-   <type name="Unlock"/>
-</node>
+<edge color="Blue">
+   <relation name="locations"> <type name="Zone"/> <type name="Location"/> </relation>
+</edge>
 
-<node visible="yes" color="Red">
-   <type name="Lock"/>
-</node>
-
-<node visible="yes" shape="Hexagon" color="Gray">
-   <type name="Skip"/>
-</node>
-
-<edge color="Blue" style="Bold" visible="no">
+<edge color="Blue" style="Solid" visible="no">
    <relation name="zones"> <type name="Vehicle"/> <type name="Zone"/> </relation>
 </edge>
 
@@ -86,9 +60,22 @@
    <relation name="locked"> <type name="Vehicle"/> <type name="Zone"/> </relation>
 </edge>
 
+<edge color="Yellow" layout="yes">
+   <relation name="buttons"> <type name="Fob"/> <type name="Button"/> </relation>
+</edge>
+
+<edge color="Yellow" layout="yes" label="fob">
+   <relation name="$fob"> <type name="Vehicle"/> <type name="Fob"/> </relation>
+</edge>
+
 <edge visible="no">
    <relation name="locations"> <type name="Vehicle"/> <type name="Location"/> </relation>
    <relation name="locationsInZone"> <type name="Vehicle"/> <type name="Zone"/> <type name="Location"/> </relation>
+   <relation name="vehicle"> <type name="Fob"/> <type name="Vehicle"/> </relation>
+</edge>
+
+<edge visible="no" layout="no" attribute="yes">
+   <relation name="cargoUnlockCountdown"> <type name="Vehicle"/> <type name="Int"/> </relation>
 </edge>
 
 </view>

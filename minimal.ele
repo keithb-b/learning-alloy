@@ -26,8 +26,6 @@ abstract sig Vehicle{
     ,zones: some Zone
     ,locationsInZone: zones one -> some locations
 
-    ,fob: disj one Fob
-
   //state
     ,var disj locked, unlocked: set zones
 }{
@@ -70,7 +68,7 @@ sig Transit extends Vehicle {
        + RearCargo  -> Rear
        + OtherCargo -> PassengerSide
 
-    fob in TransitFob
+    this.fob in TransitFob
 }
 
 //observations
@@ -91,6 +89,9 @@ pred Vehicle::otherVehiclesUnchanged{
    all v: Vehicle - this | v.lockStateUnchanged
 }
 
+fun fob: Vehicle -> Fob {
+    ~vehicle
+}
 
 //actions
 pred Vehicle::unlock[z: Zone]{
