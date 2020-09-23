@@ -40,7 +40,6 @@ abstract sig Vehicle{
     
   //facts about state
     zones = locked + unlocked
-
 }
 
 //Transit
@@ -145,12 +144,6 @@ pred Transit::cargoUnlockCountdownUpdated[z:Zone]{
 pred tick{
    all t: Transit |
        t.cargoUnlockCountdown' = larger[0, minus[t.cargoUnlockCountdown, 1]]
-}
-
-//invariant frame conditions
-fact aZoneIsLockedOrUnlocked{
-   all v: Vehicle |
-      no v.locked & v.unlocked
 }
 
 abstract sig Button{}
