@@ -25,11 +25,20 @@
    <type name="univ"/>
    <type name="VanAndOpenPadlock"/>
    <type name="seq/Int"/>
+   <set name="$_skip" type="ReifiedEvent"/>
+</node>
+
+<node label="User Action">
+   <type name="ButtonPress"/>
 </node>
 
 <node shape="Dbl Octagon">
    <type name="Fob"/>
    <type name="Vehicle"/>
+</node>
+
+<node shape="Hexagon" color="Gray">
+   <type name="ReifiedEvent"/>
 </node>
 
 <node shape="Octagon">
@@ -44,12 +53,20 @@
    <type name="Location"/>
 </node>
 
+<node visible="yes" hideunconnected="yes" shape="Hexagon" color="Gray">
+   <type name="Skip"/>
+</node>
+
 <edge color="Blue">
    <relation name="locations"> <type name="Zone"/> <type name="Location"/> </relation>
 </edge>
 
 <edge color="Blue" style="Solid" visible="no">
    <relation name="zones"> <type name="Vehicle"/> <type name="Zone"/> </relation>
+</edge>
+
+<edge color="Gray" style="Bold" visible="no" attribute="yes" label="">
+   <relation name="$_buttonPress"> <type name="ButtonPress"/> <type name="Fob"/> <type name="Button"/> </relation>
 </edge>
 
 <edge color="Green">

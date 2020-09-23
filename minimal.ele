@@ -208,5 +208,18 @@ pred unlockedAsGiven{
             all z: v.zones | not v.zoneLocked[z]
 }
 
+//event reification
+
+abstract sig ReifiedEvent{}
+one sig Skip, ButtonPress extends ReifiedEvent{}
+fun _skip: ReifiedEvent{
+    {e: Skip | skip }
+}
+
+fun _buttonPress: ButtonPress -> Fob -> Button{
+    ButtonPress -> {f: Fob, b: Button | f.userPressed[b]}
+}
+
+
 run {unlockedAsGiven} for exactly 2 Transit, 2 Fob, 16 Time
 
