@@ -129,10 +129,7 @@ pred Transit::countdownStateUnchanged{
 }
 
 pred skip{
-    all v: Vehicle | {
-        v.lockStateUnchanged
-        tick
-    }
+    all v: Vehicle | v.lockStateUnchanged
 }
 
 fun Vehicle::affectedZoneFor[z: Zone]: Zone{
@@ -149,9 +146,9 @@ fun Transit::currentCargoZones[]: some Zone{
 }
 
 pred Transit::cargoUnlockCountdownUpdated[z:Zone]{
-         z in People implies this.cargoUnlockCountdown' = 0
-    else                     this.cargoUnlockCountdown' = 3
-    all t: Transit - this | t.cargoUnlockCountdown' = t.cargoUnlockCountdown
+         z in Cargo implies this.cargoUnlockCountdown' = 3
+    else                    this.countdownStateUnchanged
+    all t: Transit - this | t.countdownStateUnchanged
 }
 
 pred tick{
