@@ -218,8 +218,8 @@ fun _skip: ReifiedEvent{
     {e: Skip | skip }
 }
 
-fun _buttonPress: ButtonPress -> Fob -> Button{
-    ButtonPress -> {f: Fob, b: Button | f.userPressed[b]}
+fun _buttonPress: ButtonPress -> Button -> Fob{
+    ButtonPress -> {b: Button, f: Fob | f.userPressed[b]}
 }
 
 //validity

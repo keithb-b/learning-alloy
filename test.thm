@@ -60,8 +60,8 @@
    <type name="Skip"/>
 </node>
 
-<edge color="Black" style="Bold" visible="yes" attribute="no" label="button press">
-   <relation name="$_buttonPress"> <type name="ButtonPress"/> <type name="Fob"/> <type name="Button"/> </relation>
+<edge color="Black" visible="yes" label="press">
+   <relation name="$_buttonPress"> <type name="ButtonPress"/> <type name="Button"/> <type name="Fob"/> </relation>
 </edge>
 
 <edge color="Blue">
